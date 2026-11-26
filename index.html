@@ -44,7 +44,7 @@ h1,h2,h3{margin:0;text-wrap:balance;line-height:1.3}
 .brand h1{font-size:20px}
 .brand p{margin:0;font-size:13px;color:var(--muted)}
 label.f{display:grid;gap:4px;font-size:13px;color:var(--muted)}
-input[type=text],input[type=password],input[type=date],input[type=number],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;color:var(--ink)}
+input[type=text],input[type=email],input[type=password],input[type=date],input[type=number],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;color:var(--ink)}
 textarea{min-height:64px;resize:vertical}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:500;white-space:nowrap}
 .btn:hover{border-color:var(--accent)}
@@ -196,12 +196,16 @@ details.wlbox summary{cursor:pointer;font-weight:600;color:var(--accent)}
 <div class="loading" id="loading" hidden><div><div class="spin"></div><span id="loadingText">กำลังโหลดข้อมูล…</span></div></div>
 
 <div id="login">
-  <form class="login-card" id="loginForm" autocomplete="off">
+  <form class="login-card" id="loginForm">
     <div class="brand"><div class="logo">ML</div><div><h1>MindLink ร้องกวาง</h1><p>ระบบติดตามผู้ป่วยจิตเวชและสารเสพติด · โรงพยาบาลร้องกวาง</p></div></div>
-    <label class="f">รหัสเจ้าหน้าที่<input type="text" id="lgUser" placeholder="เช่น S001" autocapitalize="characters"></label>
-    <label class="f">รหัสผ่าน<input type="password" id="lgPass"></label>
+    <div id="lgStep1"><label class="f">Gmail ที่ลงทะเบียนกับผู้ดูแลระบบ<input type="email" id="lgEmail" inputmode="email" autocomplete="email" placeholder="name@gmail.com"></label></div>
+    <div id="lgStep2" hidden style="display:grid;gap:10px">
+      <div class="hint">ส่งรหัส 6 หลักไปที่ <b id="lgTo"></b> แล้ว (ใช้ได้ 10 นาที)</div>
+      <label class="f">รหัสจากอีเมล<input type="text" id="lgOtp" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••" style="letter-spacing:8px;text-align:center;font-size:22px;font-weight:700"></label>
+      <div style="display:flex;justify-content:space-between"><button type="button" class="btn sm ghost" id="lgBack">เปลี่ยนอีเมล</button><button type="button" class="btn sm ghost" id="lgResend">ส่งรหัสอีกครั้ง</button></div>
+    </div>
     <div class="err" id="lgErr"></div>
-    <button class="btn primary" type="submit" id="lgBtn">เข้าสู่ระบบ</button>
+    <button class="btn primary" type="submit" id="lgBtn">ขอรหัสเข้าใช้ทาง Gmail</button>
     <div class="ver" id="verLogin"></div>
   </form>
 </div>
@@ -214,7 +218,6 @@ details.wlbox summary{cursor:pointer;font-weight:600;color:var(--accent)}
       <div class="spacer"></div>
       <div class="who"><span id="whoName"></span><span class="role" id="whoRole"></span>
         <button class="btn sm ghost" id="btnReload" title="โหลดข้อมูลล่าสุด">รีเฟรช</button>
-        <button class="btn sm ghost" id="btnPw">เปลี่ยนรหัสผ่าน</button>
         <button class="btn sm ghost" id="logout">ออกจากระบบ</button></div>
     </div>
     <nav class="tabs" role="tablist" id="tabs"></nav>
@@ -226,7 +229,7 @@ details.wlbox summary{cursor:pointer;font-weight:600;color:var(--accent)}
 
 <script>
 /* ================= ตั้งค่า ================= */
-const APP_VER='v1.2.0 (26 พ.ย. 69)';   // ต้องตรงกับ APP_VERSION ใน Code.gs
+const APP_VER='v1.3.0 (26 พ.ย. 69)';   // ต้องตรงกับ APP_VERSION ใน Code.gs
 /* ⚙️ URL ของ web app (ลงท้าย /exec) จาก Deploy > Manage deployments — ใช้เมื่อวางไฟล์นี้บน GitHub Pages / server ของ IT */
 const API_URL='https://script.google.com/macros/s/AKfycby2_hPbqyssdcwjrE5pC7PXCCU7PO-uny0CsZiRq_1RYRxnwJvui-gBsKwO6fr1LBZlxQ/exec';
 const VIA_GAS=typeof google!=='undefined'&&!!(google.script&&google.script.run);
@@ -319,13 +322,32 @@ function fail(e){toast('ไม่สำเร็จ: '+e.message)}
 
 /* ================= login ================= */
 function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);if(v===null)sessionStorage.removeItem(k);else sessionStorage.setItem(k,v)}catch(e){return null}}
+/* เข้าระบบ: Gmail → รหัส OTP ทางอีเมล */
+let lgMail='';
+function lgStep(n){
+  $('#lgStep1').hidden=n!==1;$('#lgStep2').hidden=n!==2;$('#lgErr').textContent='';
+  $('#lgBtn').textContent=n===1?'ขอรหัสเข้าใช้ทาง Gmail':'ยืนยันรหัส';
+  if(n===2)$('#lgOtp').value='';
+  setTimeout(()=>{const x=n===1?$('#lgEmail'):$('#lgOtp');if(x&&!$('#login').hidden)x.focus()},30);
+}
+try{$('#lgEmail').value=localStorage.getItem('ml_email')||''}catch(e){}
 $('#loginForm').addEventListener('submit',async e=>{
-  e.preventDefault();$('#lgErr').textContent='';$('#lgBtn').disabled=true;
-  try{const r=await call('login',$('#lgUser').value,$('#lgPass').value);D.token=r.token;ss('ml_tk',r.token);
-    if(r.mustChange)pwModal(true,$('#lgPass').value);else await boot();}
-  catch(err){$('#lgErr').textContent=err.message}
+  e.preventDefault();if($('#lgBtn').disabled)return;$('#lgErr').textContent='';$('#lgBtn').disabled=true;
+  try{
+    if($('#lgStep2').hidden){
+      const em=$('#lgEmail').value.trim().toLowerCase();if(!em){$('#lgErr').textContent='กรุณากรอก Gmail';return}
+      await call('requestOtp',em);lgMail=em;try{localStorage.setItem('ml_email',em)}catch(e){}
+      $('#lgTo').textContent=em;lgStep(2);
+    }else{
+      const c=$('#lgOtp').value.trim();if(!/^\d{6}$/.test(c)){$('#lgErr').textContent='กรอกรหัส 6 หลัก';return}
+      const r=await call('verifyOtp',lgMail,c);D.token=r.token;ss('ml_tk',r.token);await boot();
+    }
+  }catch(err){$('#lgErr').textContent=err.message}
   finally{$('#lgBtn').disabled=false}
 });
+$('#lgOtp').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'');if(e.target.value.length===6)$('#lgBtn').click()});
+$('#lgBack').onclick=()=>lgStep(1);
+$('#lgResend').onclick=async()=>{$('#lgErr').textContent='';try{await call('requestOtp',lgMail);toast('ส่งรหัสใหม่แล้ว')}catch(err){$('#lgErr').textContent=err.message}};
 async function boot(){
   loading(true,'กำลังโหลดข้อมูล…');
   try{
@@ -342,20 +364,9 @@ async function boot(){
   }catch(e){ss('ml_tk',null);$('#login').hidden=false;$('#app').hidden=true;if(!/SESSION/.test(e.message))$('#lgErr').textContent=e.message}
   finally{loading(false)}
 }
-function doLogout(silent){if(!silent)call('logout',D.token).catch(()=>{});D.token=null;ss('ml_tk',null);$('#app').hidden=true;$('#login').hidden=false;$('#lgPass').value='';closeM()}
+function doLogout(silent){if(!silent)call('logout',D.token).catch(()=>{});D.token=null;ss('ml_tk',null);$('#app').hidden=true;$('#login').hidden=false;lgStep(1);closeM()}
 $('#logout').onclick=()=>doLogout();
 $('#btnReload').onclick=()=>boot();
-$('#btnPw').onclick=()=>pwModal(false);
-function pwModal(force,oldPass){
-  modal(`<h3>${force?'ตั้งรหัสผ่านใหม่ก่อนเริ่มใช้งาน':'เปลี่ยนรหัสผ่าน'}</h3>${force?'<div class="note">บัญชีนี้ใช้รหัสผ่านเริ่มต้น กรุณาตั้งรหัสผ่านของตนเอง</div>':''}
-  <label class="fl" ${force?'hidden':''}><span>รหัสผ่านเดิม</span><input type="password" id="pw0" value="${force?esc(oldPass||''):''}"></label>
-  <label class="fl"><span>รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)</span><input type="password" id="pw1"></label>
-  <label class="fl"><span>ยืนยันรหัสผ่านใหม่</span><input type="password" id="pw2"></label>
-  <div class="mfoot">${force?'':'<button class="btn ghost" id="mCancel">ยกเลิก</button>'}<button class="btn primary" id="mSave">บันทึก</button></div>`);
-  if(force){$('#ov').onclick=null;document.removeEventListener('keydown',escClose)}else $('#mCancel').onclick=closeM;
-  $('#mSave').onclick=async()=>{if($('#pw1').value!==$('#pw2').value){toast('รหัสผ่านใหม่ 2 ช่องไม่ตรงกัน');return}
-    try{await api('changeMyPassword',$('#pw0').value,$('#pw1').value);closeM();toast('เปลี่ยนรหัสผ่านแล้ว');if(force){$('#lgPass').value='';await boot()}}catch(e){fail(e)}};
-}
 
 /* ================= derived ================= */
 const done=a=>a.status==='มา'||a.status==='ขาด';
@@ -1117,7 +1128,7 @@ async function vAdmin(){
 }
 function drawUsers(us){
   $('#uBox').className='';
-  $('#uBox').innerHTML=`<div class="tw"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>ชื่อใน Workload</th><th>สิทธิ์</th><th>สถานะ</th><th></th></tr></thead><tbody>${us.map(u=>`<tr><td class="mono">${esc(u.code)}</td><td>${esc(u.name)}</td><td>${esc(u.wname||'')}</td><td><span class="role">${esc(u.role)}</span></td><td>${String(u.active).toUpperCase()==='TRUE'?'ใช้งาน':'ปิด'}</td><td><button class="btn sm ghost" data-u="${esc(u.code)}">แก้ไข</button></td></tr>`).join('')}</tbody></table></div>`;
+  $('#uBox').innerHTML=`<div class="tw"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>Gmail</th><th>ชื่อใน Workload</th><th>สิทธิ์</th><th>สถานะ</th><th></th></tr></thead><tbody>${us.map(u=>`<tr><td class="mono">${esc(u.code)}</td><td>${esc(u.name)}</td><td>${u.email?esc(u.email):'<span style="color:var(--bad)">ยังไม่มี — เข้าระบบไม่ได้</span>'}</td><td>${esc(u.wname||'')}</td><td><span class="role">${esc(u.role)}</span></td><td>${String(u.active).toUpperCase()==='TRUE'?'ใช้งาน':'ปิด'}</td><td><button class="btn sm ghost" data-u="${esc(u.code)}">แก้ไข</button></td></tr>`).join('')}</tbody></table></div>`;
   document.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>userForm(us.find(x=>x.code===b.dataset.u)));
 }
 function userForm(u){
@@ -1127,11 +1138,11 @@ function userForm(u){
   <label class="fl"><span>ชื่อ-สกุล</span><input type="text" id="uN" value="${esc(u.name)}"></label>
   <label class="fl"><span>ชื่อในช่องเจ้าหน้าที่ Workload</span><input type="text" id="uW" value="${esc(u.wname)}" placeholder="เช่น อนุลักษณ์"></label>
   <label class="fl"><span>สิทธิ์</span><select id="uR"><option value="staff" ${u.role==='staff'?'selected':''}>staff</option><option value="admin" ${u.role==='admin'?'selected':''}>admin</option></select></label>
-  <label class="fl"><span>${e?'ตั้งรหัสผ่านใหม่ (เว้นว่าง = ไม่เปลี่ยน)':'รหัสผ่าน (อย่างน้อย 6 ตัว)'}</span><input type="password" id="uP"></label></div>
+  <label class="fl"><span>Gmail (ใช้เข้าระบบ · รับรหัส OTP)</span><input type="email" id="uE" value="${esc(u.email||'')}" placeholder="name@gmail.com"></label></div>
   <label class="checks" style="font-size:14px;align-items:center"><input type="checkbox" id="uA" ${String(u.active).toUpperCase()==='TRUE'?'checked':''}> เปิดใช้งาน</label>
   <div class="mfoot"><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn primary" id="mSave">บันทึก</button></div>`);
   $('#mCancel').onclick=closeM;
-  $('#mSave').onclick=async()=>{try{const us=await api('saveUser',{code:$('#uC').value,name:$('#uN').value,wname:$('#uW').value.trim(),role:$('#uR').value,pass:$('#uP').value,active:$('#uA').checked});closeM();drawUsers(us);toast('บันทึกผู้ใช้แล้ว')}catch(e){fail(e)}};
+  $('#mSave').onclick=async()=>{try{const us=await api('saveUser',{code:$('#uC').value,name:$('#uN').value,wname:$('#uW').value.trim(),role:$('#uR').value,email:$('#uE').value.trim().toLowerCase(),active:$('#uA').checked});closeM();drawUsers(us);toast('บันทึกผู้ใช้แล้ว')}catch(e){fail(e)}};
 }
 
 /* ================= ดูข้อมูลผู้ป่วย (กดชื่อผู้ป่วยได้ทุกหน้า) ================= */
