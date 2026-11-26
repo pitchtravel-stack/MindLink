@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<title>MindLink ร้องกวาง</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+
+/* Layout: app shell — top bar + tab rail, content in a 1180px column; reports render as A4 sheets */
+:root{
+  --bg:#f3f6fa; --surface:#ffffff; --surface-2:#eef3f9; --ink:#132338; --muted:#5a6a80; --line:#dbe3ee;
+  --accent:#1c5ea8; --accent-ink:#ffffff; --accent-soft:#e2ecf8;
+  --ok:#1e8757; --ok-soft:#e1f3ea; --warn:#b8770f; --warn-soft:#fbf0dc; --bad:#c03a33; --bad-soft:#fbe4e2;
+  --paper:#ffffff; --paper-ink:#111;
+  --f-ui:"IBM Plex Sans Thai",system-ui,sans-serif; --f-doc:"Sarabun","TH Sarabun New",serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1622; --surface:#152131; --surface-2:#1b2a3d; --ink:#e4ebf4; --muted:#93a3b8; --line:#26374c;
+  --accent:#6aa8ec; --accent-ink:#0b1420; --accent-soft:#1c3350;
+  --ok:#4cc38a; --ok-soft:#173b2c; --warn:#e3a846; --warn-soft:#3b2e17; --bad:#ef7a72; --bad-soft:#442221;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1622; --surface:#152131; --surface-2:#1b2a3d; --ink:#e4ebf4; --muted:#93a3b8; --line:#26374c;
+  --accent:#6aa8ec; --accent-ink:#0b1420; --accent-soft:#1c3350;
+  --ok:#4cc38a; --ok-soft:#173b2c; --warn:#e3a846; --warn-soft:#3b2e17; --bad:#ef7a72; --bad-soft:#442221;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.55}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.3}
+.mono{font-family:var(--f-mono);font-size:.9em;font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Login */
+#login{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.login-card{width:min(420px,100%);background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px;display:grid;gap:16px}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:42px;height:42px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-size:18px;flex:none}
+.brand h1{font-size:20px}
+.brand p{margin:0;font-size:13px;color:var(--muted)}
+label.f{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+input[type=text],input[type=password],input[type=date],input[type=number],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;color:var(--ink)}
+textarea{min-height:64px;resize:vertical}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.btn.bad{background:var(--surface);color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.demo{display:flex;gap:8px;flex-wrap:wrap}
+.hint{font-size:12.5px;color:var(--muted);background:var(--surface-2);border-radius:8px;padding:10px 12px}
+.err{color:var(--bad);font-size:13px;min-height:1em}
+.ver{font-size:11.5px;color:var(--muted);font-family:var(--f-mono);text-align:center}
+.ver-top{font-size:11px;color:var(--muted);font-family:var(--f-mono);white-space:nowrap}
+
+/* Shell */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.top-in .brand h1{font-size:16px}
+.top-in .brand p{font-size:12px}
+.top-in .logo{width:34px;height:34px;font-size:15px;border-radius:10px}
+.spacer{flex:1}
+.who{font-size:13px;display:flex;gap:8px;align-items:center}
+.role{font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.sample{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--warn-soft);color:var(--warn);font-weight:600}
+nav.tabs{max-width:1180px;margin:0 auto;padding:0 16px;display:flex;gap:2px;overflow-x:auto}
+nav.tabs button{border:0;background:none;padding:10px 14px;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);font-weight:500;white-space:nowrap}
+nav.tabs button[aria-selected=true]{color:var(--accent);border-color:var(--accent)}
+nav.tabs .badge{display:inline-block;min-width:20px;padding:0 6px;border-radius:99px;background:var(--bad);color:#fff;font-size:11px;margin-left:4px;text-align:center}
+main{max-width:1180px;margin:0 auto;padding-block:20px 60px;padding-inline:16px;display:grid;gap:18px}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar h2{font-size:20px}
+.bar select,.bar input{width:auto}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.panel h3{font-size:15px;margin-bottom:10px}
+.panel .sub{font-size:12.5px;color:var(--muted);margin:-6px 0 10px}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:2px;position:relative;overflow:hidden}
+.kpi .l{font-size:12.5px;color:var(--muted)}
+.kpi .v{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi .s{font-size:12px;color:var(--muted)}
+.kpi.ok .v{color:var(--ok)} .kpi.bad .v{color:var(--bad)} .kpi.warn .v{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
+.grid2b{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:860px){.grid2,.grid2b{grid-template-columns:1fr}}
+svg text{fill:var(--muted);font-family:var(--f-ui)}
+.legend{display:flex;gap:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.hbar{display:grid;grid-template-columns:minmax(100px,140px) 1fr 96px;gap:8px;align-items:center;font-size:13px;padding:4px 0}
+.hbar .track{height:10px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.hbar .fill{height:100%;border-radius:99px}
+.hbar .val{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* Tables */
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{font-weight:600;color:var(--muted);text-align:left;font-size:12px;letter-spacing:.02em;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.chip{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:99px;background:var(--surface-2);color:var(--muted);white-space:nowrap;font-weight:500}
+.chip.P{background:var(--accent-soft);color:var(--accent)}
+.chip.S{background:var(--warn-soft);color:var(--warn)}
+.chip.D{background:var(--bad-soft);color:var(--bad)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:99px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.wait{background:var(--surface-2);color:var(--muted)} .pill.warn{background:var(--warn-soft);color:var(--warn)}
+
+/* Today list */
+.daybar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.daybar .date{font-size:18px;font-weight:600;min-width:210px;text-align:center}
+.counts{display:flex;gap:8px;flex-wrap:wrap}
+.rows{display:grid;gap:8px}
+.row{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:center}
+.row.done{border-left-color:var(--ok)} .row.miss{border-left-color:var(--bad)} .row.pend{border-left-color:var(--accent)}
+.row .who2{display:grid;gap:3px;min-width:0}
+.row .nm{font-weight:600;font-size:15.5px}
+.row .meta{font-size:12.5px;color:var(--muted);display:flex;gap:6px 12px;flex-wrap:wrap;align-items:center}
+.row .act{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.row .act .btn{min-width:64px}
+@media (max-width:640px){.row{grid-template-columns:1fr}.row .act{justify-content:flex-start}}
+
+/* Follow-up */
+.sev{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+
+/* Modal */
+.ov{position:fixed;inset:0;background:rgba(10,20,35,.45);display:grid;place-items:center;padding:16px;z-index:50}
+.modal{background:var(--surface);border-radius:14px;width:min(640px,100%);max-height:92vh;overflow:auto;padding:20px;display:grid;gap:14px;border:1px solid var(--line)}
+.modal h3{font-size:18px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13.5px}
+.seg input:checked+label{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:2px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.fgrid{grid-template-columns:1fr}}
+.fl{display:grid;gap:6px}
+.fl>span{font-size:13px;color:var(--muted);font-weight:500}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+
+/* Toast */
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;max-width:calc(100% - 32px)}
+
+/* Report paper */
+.paper-wrap{overflow-x:auto;background:var(--surface-2);border-radius:var(--r);padding:20px}
+.paper{width:210mm;min-height:297mm;margin:0 auto;background:var(--paper);color:var(--paper-ink);padding:18mm 16mm;font-family:var(--f-doc);font-size:14px;box-shadow:0 2px 14px rgba(0,0,0,.12)}
+.paper h1{font-size:20px;text-align:center}
+.paper .c{text-align:center}
+.paper table{font-size:13px}
+.paper th,.paper td{border:1px solid #999;padding:4px 6px;color:#111}
+.paper th{background:#eef2f7;text-align:center;font-size:13px}
+.paper .sumline{display:flex;gap:18px;justify-content:center;margin:10px 0 14px;flex-wrap:wrap}
+.paper .sumline b{font-size:16px}
+.paper .sign{display:flex;justify-content:flex-end;margin-top:36px}
+.paper .sign div{text-align:center;line-height:2}
+.note{font-size:13px;color:var(--muted);background:var(--accent-soft);border-radius:8px;padding:10px 12px}
+@media print{header.top,.noprint{display:none!important}main{padding:0}.paper-wrap{padding:0;background:none}.paper{box-shadow:none;margin:0}}
+
+.schema td:first-child{font-family:var(--f-mono);font-size:12.5px;white-space:nowrap}
+.checks{display:flex;gap:6px;flex-wrap:wrap}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;counter-reset:s}
+.flow div{background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:13px}
+.flow b{display:block;font-size:13.5px;margin-bottom:2px}
+@media (prefers-reduced-motion:no-preference){.row,.kpi{transition:border-color .2s}}
+
+body{margin:0}
+button.pv{all:unset;cursor:pointer;font-weight:inherit;color:inherit;border-bottom:1px dashed var(--muted)}
+button.pv:hover{color:var(--accent);border-bottom-color:var(--accent)}
+button.pv:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pc-sec{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:6px}
+.pc-sec h4{margin:0;font-size:14px;color:var(--accent)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:4px 14px;font-size:13.5px}
+.kv div span{display:block;font-size:11.5px;color:var(--muted)}
+.hx{white-space:pre-wrap;font-size:12.5px;background:var(--surface-2);border-radius:8px;padding:8px 10px;margin:0}
+details.vh{border-top:1px solid var(--line);padding:6px 0}
+details.vh summary{cursor:pointer;font-size:13.5px}
+details.wlbox{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface-2)}
+details.wlbox summary{cursor:pointer;font-weight:600;color:var(--accent)}
+.chip.ck{cursor:pointer;padding:5px 9px;font-size:13px;display:inline-flex;gap:5px;align-items:center}
+.loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:80;font-size:15px;color:var(--muted)}
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite;margin:0 auto 10px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.busy{opacity:.55;pointer-events:none}
+.linkbox{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+.linkbox a{color:var(--accent);font-weight:600}
+@media print{body{background:#fff}.paper-wrap{overflow:visible}.paper{width:auto;min-height:0;padding:0}.note,#toast{display:none!important}}
+</style>
+</head>
+<body>
+<div class="loading" id="loading" hidden><div><div class="spin"></div><span id="loadingText">กำลังโหลดข้อมูล…</span></div></div>
+
+<div id="login">
+  <form class="login-card" id="loginForm" autocomplete="off">
+    <div class="brand"><div class="logo">ML</div><div><h1>MindLink ร้องกวาง</h1><p>ระบบติดตามผู้ป่วยจิตเวชและสารเสพติด · โรงพยาบาลร้องกวาง</p></div></div>
+    <label class="f">รหัสเจ้าหน้าที่<input type="text" id="lgUser" placeholder="เช่น S001" autocapitalize="characters"></label>
+    <label class="f">รหัสผ่าน<input type="password" id="lgPass"></label>
+    <div class="err" id="lgErr"></div>
+    <button class="btn primary" type="submit" id="lgBtn">เข้าสู่ระบบ</button>
+    <div class="ver" id="verLogin"></div>
+  </form>
+</div>
+
+<div id="app" hidden>
+  <header class="top">
+    <div class="top-in">
+      <div class="brand"><div class="logo">ML</div><div><h1>MindLink ร้องกวาง</h1><p>ติดตามผู้ป่วยจิตเวชและสารเสพติด · Telemed ฐาน รพ.สต.</p></div></div>
+      <span class="ver-top" id="verTop"></span>
+      <div class="spacer"></div>
+      <div class="who"><span id="whoName"></span><span class="role" id="whoRole"></span>
+        <button class="btn sm ghost" id="btnReload" title="โหลดข้อมูลล่าสุด">รีเฟรช</button>
+        <button class="btn sm ghost" id="btnPw">เปลี่ยนรหัสผ่าน</button>
+        <button class="btn sm ghost" id="logout">ออกจากระบบ</button></div>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+  </header>
+  <main id="main"></main>
+</div>
+<div id="toast" hidden></div>
+<div id="modalRoot"></div>
+
+<script>
+/* ================= ตั้งค่า ================= */
+const APP_VER='v1.2.0 (26 พ.ย. 69)';   // ต้องตรงกับ APP_VERSION ใน Code.gs
+/* ⚙️ URL ของ web app (ลงท้าย /exec) จาก Deploy > Manage deployments — ใช้เมื่อวางไฟล์นี้บน GitHub Pages / server ของ IT */
+const API_URL='https://script.google.com/macros/s/AKfycby2_hPbqyssdcwjrE5pC7PXCCU7PO-uny0CsZiRq_1RYRxnwJvui-gBsKwO6fr1LBZlxQ/exec';
+const VIA_GAS=typeof google!=='undefined'&&!!(google.script&&google.script.run);
+document.getElementById('verLogin').textContent='MindLink '+APP_VER;
+document.getElementById('verTop').textContent=APP_VER;
+/* ================= helpers ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const s2d=s=>new Date(s+'T00:00:00Z');
+const addDays=(s,n)=>{const d=s2d(s);d.setUTCDate(d.getUTCDate()+Math.round(n));return d.toISOString().slice(0,10)};
+const dow=s=>s2d(s).getUTCDay();
+const diffDays=(a,b)=>Math.round((s2d(b)-s2d(a))/864e5);
+const TM=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const TMF=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const TD=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const okDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||'');
+const thDate=s=>{if(!okDate(s))return '–';const d=s2d(s);return d.getUTCDate()+' '+TM[d.getUTCMonth()]+' '+String(d.getUTCFullYear()+543).slice(2)};
+const thDateFull=s=>{const d=s2d(s);return 'วัน'+TD[d.getUTCDay()]+'ที่ '+d.getUTCDate()+' '+TMF[d.getUTCMonth()]+' '+(d.getUTCFullYear()+543)};
+const fyOf=s=>{const d=s2d(s);return d.getUTCFullYear()+543+(d.getUTCMonth()>=9?1:0)};
+const fyMonth=s=>(s2d(s).getUTCMonth()+3)%12;
+const FYM=['ต.ค.','พ.ย.','ธ.ค.','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.'];
+const FYMF=['ตุลาคม','พฤศจิกายน','ธันวาคม','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน'];
+const pct=(a,b)=>b?Math.round(a*1000/b)/10:0;
+const CH={tele:'Tele กับ พยบ.รพ.สต.',teleHome:'Tele กับ อสม. (ติดบ้าน/ติดเตียง)',outreach:'พยบ.จิตเวชออกหน่วย รพ.สต.',opd:'รพ.ร้องกวาง',prh:'รพ.แพร่ / อื่นๆ',home:'เยี่ยมบ้าน'};
+const CHS={tele:'Tele รพ.สต.',teleHome:'Tele อสม.',outreach:'ออกหน่วย รพ.สต.',opd:'รพ.ร้องกวาง',prh:'รพ.แพร่/อื่นๆ',home:'เยี่ยมบ้าน'};
+const CHK=['tele','teleHome','outreach','opd','prh'];
+const isTele=c=>c==='tele'||c==='teleHome';
+const atPcu=c=>isTele(c)||c==='outreach';
+const chKey=l=>Object.keys(CH).find(k=>CH[k]===l);
+const GRP={P:'จิตเวช',S:'สารเสพติด',D:'จิตเวช+สารเสพติด'};
+const FU=['รอติดตาม','โทรแล้ว-ไม่รับสาย','ส่ง รพ.สต./อสม.ติดตาม','ติดต่อไม่ได้','ขอหยุดการรักษา','ย้ายที่อยู่/รักษาที่อื่น','รอติดตาม (ข้อมูลเดิม)'];
+const CLOSED=['จำหน่าย','ย้าย/รักษาที่อื่น','เสียชีวิต'];
+/* Workload — ค่าตามไฟล์ Workload เดิม */
+const WL={
+  point:['clinicจิตเวช','Telemed','รพ.สต.','Ward','OPD','ER','NCD','ARI','LR','โทรศัพท์','LineOA','เยี่ยมบ้าน','อื่นๆ เช่น ญาติ ชุมชน'],
+  clinic:['จิตเวช','SMIV','F152','F152ใหม่','f419','คลินิกสุรา','บุหรี่','จิตเวชเด็กและวัยรุ่น','ทำร้ายตัวเอง','OSCC','หญิงตั้งครรภ์','หญิงหลังคลอด','อื่นๆ'],
+  assess:['ซึมเศร้า','อาการทางจิต+การทานยา','AUDIT','AWS','V2','ASSIST','ระดับการติดนิโคติน','TMSE','ประเมินพัฒนาการ','TEDA4I'],
+  counsel:['Conselling','PFA','ไม่ได้ให้'],home:['ไม่เยี่ยม','เยี่ยม'],dur:['<30 นาที','>30 นาที','>1 ชม.','>3 ชม.'],sev:['elective','urgency','emergency'],
+  refer:['รพ.แพร่','รพ.สต.','Telepsychi','มินิธัญญาลักษณ์','Admit','สถาบันเด็ก']
+};
+const pointOf=ch=>({tele:'Telemed',teleHome:'Telemed',outreach:'รพ.สต.',opd:'clinicจิตเวช',prh:'อื่นๆ เช่น ญาติ ชุมชน',home:'เยี่ยมบ้าน'})[ch]||'clinicจิตเวช';
+function wlDefault(p,ch,date){return{date,hn:p.hn,point:pointOf(ch),clinic:p.clinic||(p.g==='S'?'F152':'จิตเวช'),
+  assess:/^F3[23]|^F41/i.test(p.icd||'')?'ซึมเศร้า':/^F10/i.test(p.icd||'')?'AUDIT':'อาการทางจิต+การทานยา',
+  counsel:'Conselling',homevisit:ch==='home'?'เยี่ยม':'ไม่เยี่ยม',refer:'',duration:'>30 นาที',severity:'elective',staff:WN(D.user),proc:'',note:''}}
+const nurseName=code=>{const u=(D.users||[]).find(x=>x.code===code);return u?u.name:''};
+const myPt=p=>p.nurse===D.user.code;
+const WN=u=>(u&&(u.wname||u.name))||'';
+const staffList=()=>(D.users||[]).filter(u=>u.role!=='admin'||u.code===D.user.code).map(WN);
+function maskName(n){const parts=String(n||'').replace(/^(นาย|นางสาว|นาง|ด\.ช\.|ด\.ญ\.)\s*/,'').split(/\s+/).filter(Boolean);return parts.map(x=>x.slice(0,1)+'•••').join(' ')}
+const maskHN=h=>String(h||'').slice(0,2)+'•••'+String(h||'').slice(-2);
+const ageOf=dob=>okDate(dob)?Math.floor(diffDays(dob,D.today)/365.25):'';
+
+/* ================= state ================= */
+const D={smiv:[],patients:[],appts:[],wl:[],users:[],settings:{},today:'',user:null,token:null,P:{}};
+const state={smivN:'all',smivF:'all',smivT:'all',mine:true,regN:'mine',regC:'all',view:'today',fy:0,month:'all',ch:'all',day:'',q:'',fuPcu:'all',regQ:'',regF:'all',regLimit:50,rep:{type:'miss',fy:0,month:'all',mask:true,ch:'all',day:'',pcu:'all',staff:'all'}};
+let S={teleDays:[1,2,4],cycle:90,retry:14,grace:7,lostDays:90},PCUS=[];
+
+function applySettings(){
+  const s=D.settings;
+  S={teleDays:String(s.teleDays||'1,2,4').split(',').map(Number).filter(x=>!isNaN(x)),cycle:+s.cycle||90,retry:+s.retry||14,grace:+s.grace||7,lostDays:+s.lostDays||90};
+  PCUS=String(s.pcus||'').split(',').map(x=>x.trim()).filter(Boolean).map(x=>'รพ.สต.'+x);
+}
+function snap(s){let x=s;for(let i=0;i<7;i++){if(S.teleDays.includes(dow(x)))return x;x=addDays(x,1)}return s}
+function index(){D.P={};D.patients.forEach(p=>D.P[p.hn]=p)}
+const P=hn=>D.P[hn]||{hn,name:'(ไม่พบในทะเบียน)',g:'P',pcu:'',dx:'',right:''};
+function upsertAppt(a){if(!a)return;const i=D.appts.findIndex(x=>x.aid===a.aid);if(i>=0)D.appts[i]=Object.assign(D.appts[i],a);else D.appts.push(a)}
+
+/* ================= server ================= */
+/* เปิดจาก Apps Script → google.script.run · เปิดจาก server ภายนอก → fetch JSON API (ไม่ผูกบัญชี Google ในเบราว์เซอร์) */
+function rawCall(fn,args){
+  if(VIA_GAS)return new Promise((res,rej)=>google.script.run.withSuccessHandler(res).withFailureHandler(e=>rej(new Error((e&&e.message)||String(e))))[fn](...args));
+  if(/ใส่รหัส/.test(API_URL))return Promise.reject(new Error('ยังไม่ได้ตั้งค่า API_URL ในไฟล์ Index.html'));
+  return fetch(API_URL,{method:'POST',credentials:'omit',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args})})
+    .catch(()=>{throw new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่')})
+    .then(r=>{if(!r.ok)throw new Error('เซิร์ฟเวอร์ตอบกลับผิดพลาด ('+r.status+')');return r.text()})
+    .then(t=>{let o;try{o=JSON.parse(t)}catch(e){throw new Error('ระบบตอบกลับไม่ถูกต้อง — ตรวจสอบ API_URL และการ Deploy (Anyone)')}
+      if(!o.ok)throw new Error(o.error||'เกิดข้อผิดพลาด');return o.data});
+}
+function call(fn,...args){
+  return rawCall(fn,args).catch(e=>{
+    const m=(e&&e.message)||String(e);
+    if(/SESSION_EXPIRED/.test(m)){toast('หมดเวลาการใช้งาน กรุณาเข้าสู่ระบบใหม่');doLogout(true);}
+    throw new Error(m);
+  });
+}
+const api=(fn,...args)=>call(fn,D.token,...args);
+function loading(on,t){$('#loading').hidden=!on;if(t)$('#loadingText').textContent=t}
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(t._t);t._t=setTimeout(()=>t.hidden=true,3000)}
+function fail(e){toast('ไม่สำเร็จ: '+e.message)}
+
+/* ================= login ================= */
+function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);if(v===null)sessionStorage.removeItem(k);else sessionStorage.setItem(k,v)}catch(e){return null}}
+$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();$('#lgErr').textContent='';$('#lgBtn').disabled=true;
+  try{const r=await call('login',$('#lgUser').value,$('#lgPass').value);D.token=r.token;ss('ml_tk',r.token);
+    if(r.mustChange)pwModal(true,$('#lgPass').value);else await boot();}
+  catch(err){$('#lgErr').textContent=err.message}
+  finally{$('#lgBtn').disabled=false}
+});
+async function boot(){
+  loading(true,'กำลังโหลดข้อมูล…');
+  try{
+    const r=await api('bootstrap');
+    const un=t=>t&&t.k?t.r.map(row=>{const o={};t.k.forEach((k,i)=>o[k]=row[i]);return o}):(t||[]);
+    const ap=un(r.appts);ap.forEach(a=>{if(a.date){a.fy=String(fyOf(a.date));a.fym=String(fyMonth(a.date))}});
+    const wl=un(r.wl);wl.forEach(w=>{if(w.date){w.fy=String(fyOf(w.date));w.fym=String(fyMonth(w.date))}});
+    Object.assign(D,{smiv:un(r.smiv),patients:un(r.patients),appts:ap,wl,users:r.users||[],settings:r.settings,today:r.today,user:r.user});
+    applySettings();index();
+    if(!state.day){state.mine=D.patients.some(myPt);state.regN=state.mine?'mine':'all';state.day=D.today;state.fy=fyOf(D.today);state.rep.fy=state.fy;state.rep.day=nextTeleDay(D.today);}
+    $('#login').hidden=true;$('#app').hidden=false;
+    $('#whoName').textContent=D.user.name;$('#whoRole').textContent=D.user.role;
+    render();
+  }catch(e){ss('ml_tk',null);$('#login').hidden=false;$('#app').hidden=true;if(!/SESSION/.test(e.message))$('#lgErr').textContent=e.message}
+  finally{loading(false)}
+}
+function doLogout(silent){if(!silent)call('logout',D.token).catch(()=>{});D.token=null;ss('ml_tk',null);$('#app').hidden=true;$('#login').hidden=false;$('#lgPass').value='';closeM()}
+$('#logout').onclick=()=>doLogout();
+$('#btnReload').onclick=()=>boot();
+$('#btnPw').onclick=()=>pwModal(false);
+function pwModal(force,oldPass){
+  modal(`<h3>${force?'ตั้งรหัสผ่านใหม่ก่อนเริ่มใช้งาน':'เปลี่ยนรหัสผ่าน'}</h3>${force?'<div class="note">บัญชีนี้ใช้รหัสผ่านเริ่มต้น กรุณาตั้งรหัสผ่านของตนเอง</div>':''}
+  <label class="fl" ${force?'hidden':''}><span>รหัสผ่านเดิม</span><input type="password" id="pw0" value="${force?esc(oldPass||''):''}"></label>
+  <label class="fl"><span>รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)</span><input type="password" id="pw1"></label>
+  <label class="fl"><span>ยืนยันรหัสผ่านใหม่</span><input type="password" id="pw2"></label>
+  <div class="mfoot">${force?'':'<button class="btn ghost" id="mCancel">ยกเลิก</button>'}<button class="btn primary" id="mSave">บันทึก</button></div>`);
+  if(force){$('#ov').onclick=null;document.removeEventListener('keydown',escClose)}else $('#mCancel').onclick=closeM;
+  $('#mSave').onclick=async()=>{if($('#pw1').value!==$('#pw2').value){toast('รหัสผ่านใหม่ 2 ช่องไม่ตรงกัน');return}
+    try{await api('changeMyPassword',$('#pw0').value,$('#pw1').value);closeM();toast('เปลี่ยนรหัสผ่านแล้ว');if(force){$('#lgPass').value='';await boot()}}catch(e){fail(e)}};
+}
+
+/* ================= derived ================= */
+const done=a=>a.status==='มา'||a.status==='ขาด';
+function pendingSet(){const s=new Set();D.appts.forEach(a=>{if(a.status==='นัด')s.add(a.hn)});return s}
+function lastDone(){const m={};D.appts.forEach(a=>{if(done(a)&&(!m[a.hn]||m[a.hn].date<a.date))m[a.hn]=a});return m}
+function pStatus(p,ld,pend){
+  if(CLOSED.includes(p.status))return p.status;
+  const l=ld[p.hn];
+  if(pend.has(p.hn))return 'รักษาต่อเนื่อง';
+  if(!l)return 'ไม่มีนัด';
+  if(l.status==='ขาด')return diffDays(l.date,D.today)>=S.lostDays?'ขาดการรักษา':'ขาดนัด-รอติดตาม';
+  return 'ไม่มีนัด';
+}
+function fuList(){
+  const ld=lastDone(),pend=pendingSet();
+  return Object.values(ld).filter(a=>a.status==='ขาด'&&!pend.has(a.hn)&&!CLOSED.includes(P(a.hn).status)).sort((a,b)=>a.date<b.date?-1:1);
+}
+function nextTeleDay(s){let x=addDays(s,1);for(let i=0;i<8&&!S.teleDays.includes(dow(x));i++)x=addDays(x,1);return x}
+
+/* ================= tabs ================= */
+const VIEWS=[['dash','Dashboard'],['today','บันทึกนัด'],['fu','ติดตามขาดนัด'],['smiv','SMIV'],['reg','ทะเบียนผู้ป่วย'],['rep','รายงาน / PDF'],['admin','ตั้งค่า']];
+function renderTabs(){
+  const n=fuList().length,ns=smivData().rows.filter(x=>x.alert).length;
+  $('#tabs').innerHTML=VIEWS.filter(v=>v[0]!=='admin'||D.user.role==='admin').map(([k,l])=>
+    `<button role="tab" aria-selected="${state.view===k}" data-v="${k}">${l}${k==='fu'&&n?`<span class="badge">${n}</span>`:''}${k==='smiv'&&ns?`<span class="badge">${ns}</span>`:''}</button>`).join('');
+  $('#tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{state.view=b.dataset.v;render()});
+}
+function render(){renderTabs();({dash:vDash,today:vToday,fu:vFu,smiv:vSmiv,reg:vReg,rep:vRep,admin:vAdmin})[state.view]();}
+
+/* ================= Dashboard ================= */
+function fyOptions(sel){const cur=fyOf(D.today);const ys=new Set([cur,cur-1]);D.appts.forEach(a=>{if(a.fy)ys.add(+a.fy)});return [...ys].filter(y=>y>=cur-3&&y<=cur+1).sort((a,b)=>b-a).map(y=>`<option value="${y}" ${y===sel?'selected':''}>ปีงบ ${y}</option>`).join('')}
+function vDash(){
+  const fy=state.fy,m=state.month,ch=state.ch;
+  const inFy=D.appts.filter(a=>done(a)&&+a.fy===fy&&(ch==='all'||a.ch===ch));
+  const sel=m==='all'?inFy:inFy.filter(a=>+a.fym===+m);
+  const att=sel.filter(a=>a.status==='มา').length,mis=sel.length-att;
+  const ld=lastDone(),pend=pendingSet();
+  const st={};D.patients.forEach(p=>{const s=pStatus(p,ld,pend);st[s]=(st[s]||0)+1});
+  const active=D.patients.filter(p=>!CLOSED.includes(p.status)).length;
+  const tele=sel.filter(a=>isTele(a.ch)&&a.status==='มา').length;
+  const pts=new Set(sel.filter(a=>a.status==='มา').map(a=>a.hn)).size;
+  const monthly=FYM.map((_,i)=>{const x=inFy.filter(a=>+a.fym===i);const o=x.filter(a=>a.status==='มา').length;return{o,x:x.length-o}});
+  const byPcu=PCUS.map(pc=>{const x=sel.filter(a=>atPcu(a.ch)&&P(a.hn).pcu===pc);const o=x.filter(a=>a.status==='มา').length;return{pc,n:x.length,o}}).filter(x=>x.n).sort((a,b)=>pct(b.o,b.n)-pct(a.o,a.n));
+  const byCh=CHK.map(c=>{const x=sel.filter(a=>a.ch===c);return{c,n:x.length,o:x.filter(a=>a.status==='มา').length}});
+  const byG=['P','S','D'].map(g=>{const x=sel.filter(a=>P(a.hn).g===g);return{g,n:x.length,o:x.filter(a=>a.status==='มา').length}});
+  const fl=fuList();
+  const period=m==='all'?`ปีงบประมาณ ${fy} (ต.ค. ${String(fy-1).slice(2)} – ก.ย. ${String(fy).slice(2)})`:`${FYMF[m]} ${+m<3?fy-1:fy}`;
+  $('#main').innerHTML=`
+  <div class="bar"><h2>Dashboard</h2><span class="muted">${period}</span><div class="spacer"></div>
+    <select id="fFy" aria-label="ปีงบประมาณ">${fyOptions(fy)}</select>
+    <select id="fM" aria-label="เดือน"><option value="all">ทั้งปีงบ</option>${FYMF.map((x,i)=>`<option value="${i}">${x}</option>`).join('')}</select>
+    <select id="fCh" aria-label="ช่องทาง"><option value="all">ทุกช่องทาง</option>${CHK.map(k=>`<option value="${k}">${CHS[k]}</option>`).join('')}</select></div>
+  <div class="kpis">
+    <div class="kpi"><span class="l">ผู้ป่วยในทะเบียน</span><span class="v">${active}</span><span class="s">รักษาต่อเนื่อง ${st['รักษาต่อเนื่อง']||0} · ไม่มีนัด ${st['ไม่มีนัด']||0}</span></div>
+    <div class="kpi"><span class="l">นัดที่ถึงกำหนด</span><span class="v">${sel.length.toLocaleString()}</span><span class="s">ผู้ป่วย ${pts} รายมารับบริการ</span></div>
+    <div class="kpi ok"><span class="l">มาตามนัด</span><span class="v">${pct(att,sel.length)}%</span><span class="s">${att.toLocaleString()} ครั้ง</span></div>
+    <div class="kpi bad"><span class="l">ขาดนัด</span><span class="v">${mis.toLocaleString()}</span><span class="s">${pct(mis,sel.length)}% ของนัด</span></div>
+    <div class="kpi warn"><span class="l">ขาดการรักษา</span><span class="v">${st['ขาดการรักษา']||0}</span><span class="s">ขาดนัดเกิน ${S.lostDays} วัน ยังไม่กลับมา</span></div>
+    <div class="kpi"><span class="l">Telemed (รพ.สต. + อสม.)</span><span class="v">${tele.toLocaleString()}</span><span class="s">ครั้งที่ให้บริการ</span></div>
+  </div>
+  <div class="grid2">
+    <section class="panel"><h3>นัดรายเดือน ปีงบ ${fy}</h3><p class="sub">ความสูงแท่ง = นัดที่ถึงกำหนด · ตัวเลขบนแท่ง = % มาตามนัด</p>${chartMonthly(monthly,m)}
+      <div class="legend"><span><i style="background:var(--ok)"></i>มาตามนัด</span><span><i style="background:var(--bad)"></i>ขาดนัด</span></div></section>
+    <section class="panel"><h3>% มาตามนัด แยกช่องทาง</h3>${byCh.map(x=>hbar(CHS[x.c],x.o,x.n)).join('')}
+      <h3 style="margin-top:16px">แยกกลุ่มผู้ป่วย</h3>${byG.map(x=>hbar(GRP[x.g],x.o,x.n)).join('')}</section>
+  </div>
+  ${wlDashHtml()}
+  <div class="grid2b">
+    <section class="panel"><h3>บริการฐาน รพ.สต. (Tele + ออกหน่วย)</h3><p class="sub">เรียงจาก % มาตามนัดสูงไปต่ำ</p>${byPcu.map(x=>hbar(x.pc.replace('รพ.สต.',''),x.o,x.n)).join('')||'<p class="muted">ไม่มีข้อมูล</p>'}</section>
+    <section class="panel"><h3>ผู้ขาดนัดที่ยังไม่มีนัดใหม่ (${fl.length} ราย)</h3><p class="sub">อำพรางชื่อและ HN · เรียงจากขาดนานที่สุด</p>
+      <div class="tw"><table><thead><tr><th>ผู้ป่วย</th><th>HN</th><th>กลุ่ม</th><th>รพ.สต.</th><th class="num">ขาด (วัน)</th></tr></thead><tbody>
+      ${fl.slice(0,12).map(a=>{const p=P(a.hn),d=diffDays(a.date,D.today);return`<tr><td>${esc(maskName(p.name))}</td><td class="mono">${maskHN(p.hn)}</td><td><span class="chip ${p.g}">${GRP[p.g]||''}</span></td><td>${esc((p.pcu||'').replace('รพ.สต.',''))}</td><td class="num" style="color:${d>90?'var(--bad)':d>30?'var(--warn)':'var(--ink)'};font-weight:600">${d}</td></tr>`}).join('')||'<tr><td colspan="5" class="muted">ไม่มี</td></tr>'}
+      </tbody></table></div></section>
+  </div>`;
+  $('#fM').value=m;$('#fCh').value=ch;
+  $('#fFy').onchange=e=>{state.fy=+e.target.value;vDash()};
+  $('#fM').onchange=e=>{state.month=e.target.value;vDash()};
+  $('#fCh').onchange=e=>{state.ch=e.target.value;vDash()};
+}
+function cbar(label,n,max){return `<div class="hbar"><span>${esc(label)}</span><div class="track"><div class="fill" style="width:${max?Math.round(n*100/max):0}%;background:var(--accent)"></div></div><span class="val">${n.toLocaleString()}</span></div>`}
+function wlDashHtml(){
+  const L=D.wl.filter(w=>+w.fy===state.fy&&(state.month==='all'||+w.fym===+state.month));
+  const by={},pt={},cl={};L.forEach(w=>{String(w.staff).split(/\s*,\s*/).filter(Boolean).forEach(n=>by[n]=(by[n]||0)+1);pt[w.point||'ไม่ระบุ']=(pt[w.point||'ไม่ระบุ']||0)+1;cl[w.clinic||'ไม่ระบุ']=(cl[w.clinic||'ไม่ระบุ']||0)+1});
+  const srt=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]);const mx=o=>Math.max(1,...Object.values(o));
+  return `<div class="grid2b"><section class="panel"><h3>Workload ${L.length.toLocaleString()} รายการ · ผู้ป่วย ${new Set(L.map(w=>w.hn)).size.toLocaleString()} ราย</h3><p class="sub">แยกเจ้าหน้าที่ (งานร่วมนับให้ทุกคน)</p>${srt(by).map(([k,v])=>cbar(k,v,mx(by))).join('')||'<p class="muted">ไม่มีข้อมูล</p>'}</section>
+  <section class="panel"><h3>Workload แยกจุดให้บริการ</h3>${srt(pt).slice(0,8).map(([k,v])=>cbar(k,v,mx(pt))).join('')}<h3 style="margin-top:14px">แยกคลินิก</h3>${srt(cl).slice(0,8).map(([k,v])=>cbar(k,v,mx(cl))).join('')}</section></div>`;
+}
+function hbar(label,o,n){const r=pct(o,n);const c=r>=85?'var(--ok)':r>=70?'var(--warn)':'var(--bad)';
+  return `<div class="hbar"><span>${esc(label)}</span><div class="track"><div class="fill" style="width:${r}%;background:${c}"></div></div><span class="val">${n?r+'%':'–'} <span class="muted" style="font-size:11px">(${n})</span></span></div>`}
+function chartMonthly(data,sel){
+  const W=680,H=250,L=36,B=26,T=22,cw=(W-L-8)/12;
+  const max=Math.max(10,...data.map(d=>d.o+d.x));const step=max>150?50:max>60?20:10;const top=Math.ceil(max/step)*step;
+  const y=v=>H-B-(v/top)*(H-B-T);
+  let g='';for(let v=0;v<=top;v+=step)g+=`<line x1="${L}" x2="${W-8}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11">${v}</text>`;
+  const bw=cw*.58;
+  data.forEach((d,i)=>{const x=L+i*cw+(cw-bw)/2;const t=d.o+d.x;const dim=sel!=='all'&&+sel!==i?' opacity=".35"':'';
+    if(t){g+=`<g${dim}><rect x="${x}" y="${y(d.o)}" width="${bw}" height="${y(0)-y(d.o)}" fill="var(--ok)" rx="2"/><rect x="${x}" y="${y(t)}" width="${bw}" height="${y(d.o)-y(t)}" fill="var(--bad)" rx="2"/>
+      <text x="${x+bw/2}" y="${y(t)-6}" text-anchor="middle" font-size="10.5" style="fill:var(--ink)">${Math.round(d.o*100/t)}%</text></g>`}
+    g+=`<text x="${x+bw/2}" y="${H-8}" text-anchor="middle" font-size="11">${FYM[i]}</text>`});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="กราฟนัดรายเดือน">${g}</svg>`;
+}
+
+/* ================= บันทึกนัด ================= */
+function stepTele(s,dir){let x=addDays(s,dir);for(let i=0;i<8&&!S.teleDays.includes(dow(x));i++)x=addDays(x,dir);return x}
+function vToday(){
+  const day=state.day,q=state.q.trim();
+  let list=D.appts.filter(a=>a.date===day&&['นัด','มา','ขาด'].includes(a.status));
+  const hasMine=D.patients.some(myPt);
+  if(hasMine&&state.mine)list=list.filter(a=>myPt(P(a.hn)));
+  const c={all:list.length,o:list.filter(a=>a.status==='มา').length,x:list.filter(a=>a.status==='ขาด').length};c.w=c.all-c.o-c.x;
+  if(q)list=list.filter(a=>{const p=P(a.hn);return (p.name||'').includes(q)||a.hn.includes(q)||(p.pcu||'').includes(q)});
+  list.sort((a,b)=>(P(a.hn).pcu||'').localeCompare(P(b.hn).pcu||'','th')||(P(a.hn).name||'').localeCompare(P(b.hn).name||'','th'));
+  $('#main').innerHTML=`
+  <div class="bar"><h2>บันทึกนัด</h2><div class="spacer"></div>
+    <div class="daybar"><button class="btn sm" id="dPrev">‹ ก่อนหน้า</button><input type="date" id="dPick" value="${day}" style="width:auto"><span class="date">${thDateFull(day).replace('วัน','')}</span><button class="btn sm" id="dNext">ถัดไป ›</button><button class="btn sm ghost" id="dToday">วันนี้</button></div></div>
+  <div class="bar"><div class="counts"><span class="pill wait">นัด ${c.all}</span><span class="pill ok">มา ${c.o}</span><span class="pill bad">ขาด ${c.x}</span><span class="pill warn">รอบันทึก ${c.w}</span></div>
+    <div class="spacer"></div>${hasMine?`<div class="seg" role="group" aria-label="แสดงผู้ป่วย"><input type="radio" name="mine" id="mine1" ${state.mine?'checked':''}><label for="mine1">ผู้ป่วยของฉัน</label><input type="radio" name="mine" id="mine0" ${state.mine?'':'checked'}><label for="mine0">ทั้งหมด</label></div>`:''}<input type="text" id="q" placeholder="ค้นหา HN / ชื่อ / รพ.สต." value="${esc(q)}" style="width:min(240px,100%)"><button class="btn primary sm" id="addWalk">+ ผู้ป่วยนอกนัด</button><button class="btn sm" id="addWl">+ บันทึกงานอื่น (Ward/ER/โทร)</button></div>
+  ${S.teleDays.includes(dow(day))?'':`<div class="note">วันนี้ไม่ใช่วัน Telemed (${S.teleDays.map(d=>TD[d]).join(' / ')})</div>`}
+  <div class="note">กด <b>มา</b> = บันทึกค่าปกติ (Remed · ยาเดิม · ค่าส่งตามสิทธิ์) และออกนัด +${S.cycle} วันตรงวัน Telemed · <b>ขาด</b> = นัดใหม่ +${S.retry} วัน · <b>รายละเอียด</b> = บันทึก V/S, 2Q/9Q/8Q, ปรับยา และคัดลอกข้อความลง HosXP · นัดที่ไม่มีบันทึกเกิน ${S.grace} วัน ระบบจะเปลี่ยนเป็นขาดนัดเอง</div>
+  <div class="rows">${list.length?list.map(rowHtml).join(''):'<div class="panel muted">ไม่มีนัดในวันนี้</div>'}</div>
+  ${wlDayHtml(day)}`;
+  $('#dPrev').onclick=()=>{state.day=stepTele(day,-1);vToday()};
+  $('#dNext').onclick=()=>{state.day=stepTele(day,1);vToday()};
+  $('#dToday').onclick=()=>{state.day=D.today;vToday()};
+  $('#dPick').onchange=e=>{if(e.target.value){state.day=e.target.value;vToday()}};
+  const qi=$('#q');qi.oninput=()=>{state.q=qi.value;const pos=qi.selectionStart;vToday();const n=$('#q');n.focus();n.setSelectionRange(pos,pos)};
+  $('#addWalk').onclick=()=>pickPatientForWalkin();
+  $('#addWl').onclick=()=>wlModal(null);
+  if($('#mine1')){$('#mine1').onchange=()=>{state.mine=true;vToday()};$('#mine0').onchange=()=>{state.mine=false;vToday()}}
+  document.querySelectorAll('[data-wle]').forEach(b=>b.onclick=()=>wlModal(D.wl.find(w=>w.wid===b.dataset.wle)));
+  document.querySelectorAll('[data-wld]').forEach(b=>b.onclick=()=>wlDelete(D.wl.find(w=>w.wid===b.dataset.wld)));
+  document.querySelectorAll('[data-rec]').forEach(b=>b.onclick=()=>{const a=D.appts.find(x=>x.aid===b.dataset.id);
+    if(b.dataset.rec==='detail')openVisit(a);else quick(a,b.dataset.rec,b)});
+}
+function feeDefault(p,ch){if(!atPcu(ch))return 'มารับยาเองที่ รพ.';return /UC/.test(p.right||'UC')?'ฟรี (UC)':'ชำระค่าส่ง 65 บาท'}
+function chText(ch,p){const pc=p.pcu||'รพ.สต.';return ch==='tele'?' รับบริการทาง telemedicine ร่วมกับพยาบาล '+pc:ch==='teleHome'?' รับบริการทาง telemedicine ที่บ้านร่วมกับ อสม. (ผู้ป่วยติดบ้าน/ติดเตียง) เขต '+pc:ch==='outreach'?' พยาบาลจิตเวชออกหน่วยที่ '+pc:''}
+async function quick(a,st,btn){
+  const p=P(a.hn);const row=btn.closest('.row');row.classList.add('busy');
+  const d={aid:a.aid,date:a.date,status:st};
+  if(st==='มา')Object.assign(d,{sym:'สงบ',ctl:'Controlled',adh:'สม่ำเสมอ',risk:'ไม่มี',med:'Remed',disp:'ยาเดิม',fee:feeDefault(p,a.ch),nat:a.ch==='prh'?'prh':a.ch,ship:p.shipAddr||p.addr||'',
+    hist:`CC : มาตรวจตามนัด${chText(a.ch,p)}\nPI : อาการทางจิตสงบ ไม่มีหูแว่ว ไม่มีภาพหลอน กินยาสม่ำเสมอ\nผลการรักษา: Controlled · Remed · ยาเดิม`,
+    wl:Object.assign(wlDefault(p,a.ch,a.date),D.wl.find(w=>w.aid===a.aid)||{})});
+  try{const r=await api('recordVisit',d);applyVisit(r);toast(`บันทึก “${st}” แล้ว — นัดครั้งถัดไป ${thDate(r.next.date)}`);renderTabs();vToday()}
+  catch(e){row.classList.remove('busy');fail(e)}
+}
+/* ---------- Workload helpers ---------- */
+const NONEXT=['จำหน่าย','ย้าย/รักษาที่อื่น','เสียชีวิต','ปฏิเสธการรักษา','อื่นๆ'];
+const noNx=a=>/^ไม่นัด/.test(a&&a.fu||'');
+function nextTxt(a){if(noNx(a))return 'ไม่นัด';const nx=D.appts.find(x=>x.aid===a.nextAid);return thDate(nx?nx.date:a.next)}
+function applyVisit(r){upsertAppt(r.appt);upsertAppt(r.next);applyWl(r);
+  if(r.patient){const i=D.patients.findIndex(x=>x.hn===r.patient.hn);if(i>=0)D.patients[i]=Object.assign(D.patients[i],r.patient);index()}
+  (r.cancelled||[]).forEach(id=>{const a=D.appts.find(x=>x.aid===id);if(a)a.status='ยกเลิก'})}
+function applyWl(r){if(r.wlRemovedAid)D.wl=D.wl.filter(w=>w.aid!==r.wlRemovedAid);if(r.wl){const i=D.wl.findIndex(w=>w.wid===r.wl.wid);if(i>=0)D.wl[i]=r.wl;else D.wl.push(r.wl)}}
+function opt(list,val){const l=val&&!list.includes(val)?[val,...list]:list;return l.map(x=>`<option ${x===val?'selected':''}>${esc(x)}</option>`).join('')}
+function wlFields(w){
+  const as=String(w.assess||'').split(/\s*,\s*/).filter(Boolean),stf=String(w.staff||'').split(/\s*,\s*/).filter(Boolean);
+  const sl=[...new Set([...staffList(),...stf])];
+  return `<div class="fgrid" style="margin-top:8px">
+    <label class="fl"><span>จุดให้บริการ</span><select id="wPoint">${opt(WL.point,w.point)}</select></label>
+    <label class="fl"><span>คลินิก</span><select id="wClinic">${opt(WL.clinic,w.clinic)}</select></label></div>
+  <div class="fl"><span>ประเมิน (เลือกได้หลายข้อ)</span><div class="checks">${WL.assess.map((x,i)=>`<label class="chip ck"><input type="checkbox" data-as value="${esc(x)}" ${as.includes(x)?'checked':''}> ${esc(x)}</label>`).join('')}</div></div>
+  <div class="fgrid">
+    <div class="fl"><span>ให้คำปรึกษา</span>${seg('wc',WL.counsel,w.counsel||'ไม่ได้ให้')}</div>
+    <div class="fl"><span>เยี่ยมบ้าน</span>${seg('wh',WL.home,w.homevisit||'ไม่เยี่ยม')}</div>
+    <div class="fl"><span>ระยะเวลา</span>${seg('wd',WL.dur,w.duration||'>30 นาที')}</div>
+    <div class="fl"><span>ความรุนแรง</span>${seg('wv',WL.sev,w.severity||'elective')}</div></div>
+  <div class="fl"><span>เจ้าหน้าที่ (ร่วมให้บริการเลือกเพิ่มได้)</span><div class="checks">${sl.map(x=>`<label class="chip ck"><input type="checkbox" data-sf value="${esc(x)}" ${stf.includes(x)?'checked':''}> ${esc(x)}</label>`).join('')}</div></div>
+  <div class="fgrid"><label class="fl"><span>ประสานส่งต่อ</span><input type="text" id="wRefer" list="dlRefer" value="${esc(w.refer)}" placeholder="ไม่มี"><datalist id="dlRefer">${WL.refer.map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label>
+    <label class="fl"><span>หัตถการ</span><input type="text" id="wProc" value="${esc(w.proc)}"></label></div>
+  <label class="fl"><span>หมายเหตุ Workload</span><input type="text" id="wNote" value="${esc(w.note)}"></label>`;
+}
+function wlRead(){const c=rv('wc');return{point:$('#wPoint').value,clinic:$('#wClinic').value,
+  assess:[...document.querySelectorAll('[data-as]:checked')].map(x=>x.value).join(', '),counsel:c==='ไม่ได้ให้'?'':c,homevisit:rv('wh'),duration:rv('wd'),severity:rv('wv'),
+  staff:[...document.querySelectorAll('[data-sf]:checked')].map(x=>x.value).join(', '),refer:$('#wRefer').value.trim(),proc:$('#wProc').value.trim(),note:$('#wNote').value.trim()}}
+function wlDayHtml(day){
+  let l=D.wl.filter(w=>w.date===day);
+  if(state.mine)l=l.filter(w=>String(w.staff).split(/\s*,\s*/).includes(WN(D.user)));
+  return `<section class="panel"><h3>Workload วันนี้${state.mine?' ของฉัน':''} (${l.length} รายการ)</h3><p class="sub">รายการจากปุ่ม มา / รายละเอียด จะลงให้อัตโนมัติ · งานนอกนัด (Ward, ER, โทรศัพท์, ญาติ) กด “+ บันทึกงานอื่น”</p>
+  <div class="tw"><table><thead><tr><th>ผู้ป่วย</th><th>จุดให้บริการ</th><th>คลินิก</th><th>ประเมิน</th><th>คำปรึกษา</th><th>ระยะเวลา</th><th>เจ้าหน้าที่</th><th></th></tr></thead><tbody>
+  ${l.map(w=>{const p=P(w.hn);return `<tr><td>${esc(p.name)}<div class="muted mono" style="font-size:11.5px">${esc(w.hn)}</div></td><td>${esc(w.point)}</td><td>${esc(w.clinic)}</td><td>${esc(w.assess)}</td><td>${esc(w.counsel)}</td><td>${esc(w.duration)}</td><td>${esc(w.staff)}</td>
+    <td style="white-space:nowrap"><button class="btn sm ghost" data-wle="${esc(w.wid)}">แก้ไข</button>${w.aid?'':`<button class="btn sm ghost" data-wld="${esc(w.wid)}" style="color:var(--bad)">ลบ</button>`}</td></tr>`}).join('')||'<tr><td colspan="8" class="muted">ยังไม่มีรายการ</td></tr>'}
+  </tbody></table></div></section>`;
+}
+/* บันทึก/แก้ไข Workload แบบไม่ผูกนัด */
+function wlModalFor(hn,preset){wlModal(null,hn,preset)}
+function wlModal(w,presetHn,preset){
+  const edit=!!w;let hn=w?w.hn:(presetHn||'');
+  const body=()=>{const p=hn?P(hn):null;const base=w||(preset&&p?preset:(p?wlDefault(p,'opd',state.day):wlDefault({hn:'',g:'P'},'opd',state.day)));if(!w&&!preset)base.point='Ward';
+    return `<h3>${edit?'แก้ไข Workload':'บันทึกงานอื่น (ไม่ผูกนัด)'}</h3>
+    ${p?`<div class="row pend" style="padding:8px 12px"><div class="who2"><span class="nm">${esc(p.name)}</span><span class="meta"><span class="mono">HN ${esc(p.hn)}</span><span>${esc(p.icd||p.dx)}</span><span>${esc(nurseName(p.nurse)||'')}</span></span></div>${edit?'':'<div class="act"><button class="btn sm ghost" id="wChg">เปลี่ยนผู้ป่วย</button></div>'}</div>`
+      :`<input type="text" id="wq" placeholder="ค้นหา HN หรือชื่อ อย่างน้อย 2 ตัวอักษร"><div id="wres" class="rows" style="max-height:34vh;overflow:auto"></div><button class="btn sm" id="wNew">+ ลงทะเบียนผู้ป่วยใหม่</button>`}
+    <label class="fl"><span>วันที่</span><input type="date" id="wDate" value="${esc(w?w.date:(preset?preset.date:state.day))}"></label>
+    ${wlFields(base)}
+    <div class="mfoot"><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn primary" id="mSave" ${p?'':'disabled'}>บันทึก</button></div>`};
+  const draw=()=>{modal(body());$('#mCancel').onclick=closeM;
+    if($('#wChg'))$('#wChg').onclick=()=>{hn='';draw()};
+    if($('#wNew'))$('#wNew').onclick=()=>openPatientForm(null);
+    if($('#wq')){$('#wq').focus();$('#wq').oninput=()=>{const q=$('#wq').value.trim();if(q.length<2){$('#wres').innerHTML='';return}
+      const l=D.patients.filter(p=>p.hn.includes(q)||(p.name||'').includes(q)).slice(0,15);
+      $('#wres').innerHTML=l.map(p=>`<div class="row pend" style="padding:6px 10px"><div class="who2"><span class="nm" style="font-size:14px">${esc(p.name)}</span><span class="meta"><span class="mono">HN ${esc(p.hn)}</span><span>${esc(p.clinic||'')}</span></span></div><div class="act"><button class="btn sm primary" data-pk="${esc(p.hn)}">เลือก</button></div></div>`).join('')||'<p class="muted">ไม่พบ — ลงทะเบียนผู้ป่วยใหม่ก่อน</p>';
+      document.querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>{hn=b.dataset.pk;draw()})}}
+    $('#mSave').onclick=async()=>{const o=Object.assign(wlRead(),{hn,date:$('#wDate').value});if(w){o.wid=w.wid;if(w.aid)o.aid=w.aid}
+      if(!okDate(o.date)){toast('กรุณาเลือกวันที่');return}if(!o.staff){toast('เลือกเจ้าหน้าที่อย่างน้อย 1 คน');return}
+      $('#mSave').disabled=true;try{const r=await api('saveWorkload',o);applyWl({wl:r});closeM();toast('บันทึก Workload แล้ว');render()}catch(e){$('#mSave').disabled=false;fail(e)}}};
+  draw();
+}
+function wlDelete(w){
+  modal(`<h3>ลบรายการ Workload?</h3><p>${esc(P(w.hn).name)} · ${thDate(w.date)} · ${esc(w.point)}</p><div class="mfoot"><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn bad" id="mSave">ลบ</button></div>`);
+  $('#mCancel').onclick=closeM;$('#mSave').onclick=async()=>{try{await api('deleteWorkload',w.wid);D.wl=D.wl.filter(x=>x.wid!==w.wid);closeM();toast('ลบแล้ว');render()}catch(e){fail(e)}};
+}
+function rowHtml(a){
+  const p=P(a.hn);const prev=D.appts.filter(x=>x.hn===a.hn&&x.date<a.date&&x.status==='มา').sort((x,y)=>x.date<y.date?-1:1).pop();
+  const cls=a.status==='มา'?'done':a.status==='ขาด'?'miss':'pend';
+  let act;
+  if(done(a)){const nx=D.appts.find(x=>x.aid===a.nextAid);act=`<span class="pill ${a.status==='มา'?'ok':'bad'}">${a.status==='มา'?(a.rel==='TRUE'?'✓ ญาติรับแทน':'✓ มา'):'✕ ขาด'}</span><span class="muted" style="font-size:12.5px">${noNx(a)?esc(a.fu):'นัดต่อ '+thDate(nx?nx.date:a.next)}</span><button class="btn sm ghost" data-rec="detail" data-id="${a.aid}">แก้ไข</button>`}
+  else if(a.date>D.today)act=`<span class="pill wait">นัดล่วงหน้า</span><button class="btn sm ghost" data-rec="detail" data-id="${a.aid}">เลื่อนนัด</button>`;
+  else act=`<button class="btn ok" data-rec="มา" data-id="${a.aid}">มา</button><button class="btn bad" data-rec="ขาด" data-id="${a.aid}">ขาด</button><button class="btn sm" data-rec="detail" data-id="${a.aid}">รายละเอียด</button>`;
+  return `<div class="row ${cls}"><div class="who2"><span class="nm"><button type="button" class="pv" data-pv="${esc(p.hn)}">${esc(p.name)}</button> <span class="chip ${p.g}">${GRP[p.g]||''}</span>${isSmiv(p)?' <span class="pill bad" style="font-size:11px;padding:1px 8px">SMIV</span>':''}${p.remark?` <span class="chip">${esc(p.remark)}</span>`:''}</span>
+    <span class="meta"><span class="mono">HN ${esc(p.hn)}</span>${ageOf(p.dob)!==''?`<span>${ageOf(p.dob)} ปี</span>`:''}<span>${esc(p.icd||p.dx)}</span><span>📍 ${atPcu(a.ch)?esc(CHS[a.ch]+' · '+(p.pcu||'').replace('รพ.สต.','')):esc(CH[a.ch]||a.ch)}</span><span>☎ ${esc(p.phone||'-')}</span><span>${esc(p.right||'')}</span>${!state.mine&&p.nurse?`<span>👤 ${esc(nurseName(p.nurse))}</span>`:''}
+    ${prev?`<span>ครั้งก่อน ${thDate(prev.date)}${prev.q9?' · 9Q='+esc(prev.q9):''}${prev.risk==='มี'?' · <b style="color:var(--bad)">SMI-V</b>':''}</span>`:''}</span></div>
+    <div class="act">${act}</div></div>`;
+}
+
+/* ================= modal ================= */
+function seg(name,opts,val){return `<div class="seg">${opts.map((o,i)=>`<input type="radio" name="${name}" id="${name}${i}" value="${esc(o)}" ${o===val?'checked':''}><label for="${name}${i}">${esc(o)}</label>`).join('')}</div>`}
+function modal(html){$('#modalRoot').innerHTML=`<div class="ov" id="ov"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`;
+  $('#ov').onclick=e=>{if(e.target.id==='ov')closeM()};document.addEventListener('keydown',escClose)}
+function escClose(e){if(e.key==='Escape')closeM()}
+function closeM(){$('#modalRoot').innerHTML='';document.removeEventListener('keydown',escClose)}
+const rv=n=>document.querySelector(`input[name="${n}"]:checked`)?.value;
+
+function openVisit(a){
+  const p=P(a.hn);const g=p.g;
+  const nx=D.appts.find(x=>x.aid===a.nextAid);
+  const defNext=(nx&&nx.date)||snap(addDays(a.date,S.cycle));
+  const future=a.date>D.today&&a.status==='นัด';
+  modal(`<h3>${esc(p.name)} <span class="chip ${g}">${GRP[g]||''}</span></h3>
+  <div class="muted" style="font-size:13px"><span class="mono">HN ${esc(p.hn)}</span> · ${esc(p.dx)} · ${esc(p.right)} · ฐาน ${esc(p.pcu)}${p.allergy?` · แพ้ยา: ${esc(p.allergy)}`:''}</div>
+  ${future?`<div class="fgrid"><label class="fl"><span>เลื่อนนัดเป็นวันที่</span><input type="date" id="vMove" value="${esc(a.date)}"></label></div>
+  <div class="mfoot"><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn primary" id="mMove">บันทึกเลื่อนนัด</button></div>`:`
+  <div class="fgrid"><div class="fl"><span>การมารับบริการ ${thDate(a.date)}</span>${seg('st',['มา','ญาติรับยาแทน','ขาด','เลื่อนนัด'],a.status==='ขาด'?'ขาด':a.rel==='TRUE'?'ญาติรับยาแทน':'มา')}</div>
+  <div class="fl"><span>ช่องทาง</span>${seg('ch',CHK.map(k=>CH[k]),CH[a.ch]||CH.tele)}</div></div>
+  <div class="fgrid" style="grid-template-columns:repeat(auto-fit,minmax(90px,1fr))">
+    <label class="fl"><span>BP</span><input type="text" id="vBp" value="${esc(a.bp)}" placeholder="120/80"></label>
+    <label class="fl"><span>P</span><input type="number" id="vP" value="${esc(a.pr)}"></label>
+    <label class="fl"><span>BW (kg)</span><input type="number" step="0.1" id="vBw" value="${esc(a.bw)}"></label>
+    <label class="fl"><span>2Q</span><select id="v2q"><option>negative</option><option ${a.q2==='positive'?'selected':''}>positive</option></select></label>
+    <label class="fl"><span>9Q</span><input type="number" id="v9q" value="${esc(a.q9)}"></label>
+    <label class="fl"><span>8Q</span><input type="number" id="v8q" value="${esc(a.q8)}"></label></div>
+  <div class="fgrid">
+    <div class="fl"><span>อาการทางจิต</span>${seg('sym',['สงบ','มีอาการ'],a.sym==='มีอาการ'?'มีอาการ':'สงบ')}</div>
+    <div class="fl"><span>ผลการรักษา</span>${seg('ctl',['Controlled','Uncontrolled'],a.ctl||'Controlled')}</div>
+    <div class="fl"><span>การกินยา</span>${seg('adh',['สม่ำเสมอ','ไม่สม่ำเสมอ','ไม่กินยา'],a.adh||'สม่ำเสมอ')}</div>
+    ${g!=='P'?`<div class="fl"><span>การใช้สารเสพติด/สุรา</span>${seg('sub',['ไม่ใช้','ใช้ลดลง','ยังใช้'],a.sub&&a.sub!=='-'?a.sub:'ไม่ใช้')}</div>`:''}
+    <div class="fl"><span>เสี่ยงก่อความรุนแรง (SMI-V)</span>${seg('risk',['ไม่มี','มี'],a.risk||'ไม่มี')}</div>
+    <div class="fl"><span>การปรับยา</span>${seg('med',['Remed','ปรับยา','ส่งพบแพทย์'],a.med||'Remed')}</div>
+    <div class="fl"><span>การจ่ายยา</span>${seg('disp',['ยาเดิม','จ่ายยาเพิ่มถึงวันนัด','วันนี้ไม่จ่ายยา'],a.disp||'ยาเดิม')}</div>
+    <div class="fl"><span>ค่าส่งยา</span>${seg('fee',['ฟรี (UC)','ชำระค่าส่ง 65 บาท','วันนี้ไม่ส่งยา','มารับยาเองที่ รพ.'],a.fee||feeDefault(p,a.ch))}</div>
+  </div>
+  <label class="fl"><span>ที่อยู่ส่งยา (rider)</span><input type="text" id="vShip" value="${esc(a.ship||p.shipAddr||p.addr)}"></label>
+  <label class="fl"><span>รายละเอียดการปรับยา</span><input type="text" id="vMedD" value="${esc(a.medDetail)}" placeholder="เช่น ลด trazodone (50) 1*1 hs"></label>
+  <label class="fl"><span>อาการ / ยาเหลือ / หมายเหตุ</span><textarea id="vNote" placeholder="เช่น นอนหลับดี · ยาเหลือ Sertraline 30">${esc(a.note)}</textarea></label>
+  <div class="fgrid"><div class="fl"><span>นัดที่</span>${seg('nat',[...CHK.map(k=>CH[k]),'ไม่นัด'],noNx(a)?'ไม่นัด':CH[a.nat]||CH[a.ch]||CH.tele)}</div>
+    <label class="fl" id="vNextW"><span>นัดครั้งถัดไป</span><input type="date" id="vNext" value="${esc(defNext)}"></label></div>
+  <div class="fgrid" id="vNoW"><div class="fl"><span>เหตุผลที่ไม่นัด</span>${seg('nnr',NONEXT,(String(a.fu||'').match(/^ไม่นัด: ([^—]+?)(?: —|$)/)||[])[1]||'จำหน่าย')}</div>
+    <label class="fl"><span>รายละเอียด</span><input type="text" id="vNoNote" value="${esc((String(a.fu||'').match(/ — (.*)$/)||[])[1]||'')}" placeholder="เช่น ส่งต่อรักษา รพ.แพร่ / แพทย์ให้หยุดยา"></label>
+    <p class="muted" style="font-size:12.5px;margin:0;grid-column:1/-1">จำหน่าย / ย้าย / เสียชีวิต → ปิดเคสในทะเบียนและยกเลิกนัดที่ค้างอยู่ · เหตุผลอื่น → สถานะ "ไม่มีนัด"</p></div>
+  <div class="fl"><span>ข้อความสำหรับวางใน HosXP (สร้างอัตโนมัติ)</span><textarea id="vHos" readonly style="font-size:12.5px;min-height:120px;background:var(--surface-2)"></textarea></div>
+  <details class="wlbox" open><summary>Workload (ลงครั้งเดียว ไม่ต้องลงไฟล์ Workload ซ้ำ)</summary>${wlFields(Object.assign(wlDefault(p,a.ch,a.date),D.wl.find(w=>w.aid===a.aid)||{}))}</details>
+  <div class="mfoot"><button class="btn" id="mCopy">คัดลอกข้อความ</button><span class="spacer"></span><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn primary" id="mSave">บันทึก</button></div>`}`);
+  $('#mCancel').onclick=closeM;
+  if(future){$('#mMove').onclick=async()=>{const d=$('#vMove').value;if(!okDate(d))return;
+    try{const r=await api('reschedule',a.aid,d);upsertAppt(r);closeM();toast('เลื่อนนัดเป็น '+thDate(d));render()}catch(e){fail(e)}};return}
+  const hos=()=>{const st=rv('st'),chN=chKey(rv('ch'));
+    $('#vHos').value=`BP ${$('#vBp').value||'-'} mmHg  P ${$('#vP').value||'-'} /min  BW ${$('#vBw').value||'-'} kg
+CC : ${st==='ญาติรับยาแทน'?'ญาติมารับยาแทนตามนัด':'มาตรวจตามนัด'}${chText(chN,p)}
+PI : ผู้ป่วย ${String(p.dx||'').replace(/^[FG][\d.]+\s*/,'')} อาการทางจิต${rv('sym')}${rv('sym')==='สงบ'?' ไม่มีหูแว่ว ไม่มีภาพหลอน':''} กินยา${rv('adh')}${rv('sub')?' · สารเสพติด/สุรา: '+rv('sub'):''}
+ผลการรักษา: ${rv('ctl')}   2Q ${$('#v2q').value}   9Q = ${$('#v9q').value||'-'} คะแนน   8Q = ${$('#v8q').value||'-'} คะแนน   SMI-V: ${rv('risk')}
+${$('#vNote').value}
+การปรับยา: ${rv('med')}${$('#vMedD').value?' — '+$('#vMedD').value:''} · ${rv('disp')} · ค่าส่งยา: ${rv('fee')}
+${rv('nat')==='ไม่นัด'?'ไม่นัดครั้งต่อไป — '+rv('nnr')+($('#vNoNote').value?' ('+$('#vNoNote').value+')':''):'นัดครั้งต่อไป '+thDate($('#vNext').value)+' ช่องทาง '+rv('nat')}`.trim()};
+  const tgl=()=>{const no=rv('nat')==='ไม่นัด';$('#vNextW').hidden=no;$('#vNoW').hidden=!no;
+    const sl=document.querySelector('label[for="st3"]');if(sl)sl.style.display=no?'none':''};
+  tgl();hos();const md=document.querySelector('.modal');md.addEventListener('input',hos);md.addEventListener('change',()=>{tgl();hos()});
+  $('#mCopy').onclick=()=>{const t=$('#vHos');t.select();
+    const ok=()=>toast('คัดลอกแล้ว วางใน HosXP ได้เลย');
+    if(navigator.clipboard)navigator.clipboard.writeText(t.value).then(ok,()=>{document.execCommand('copy');ok()});else{document.execCommand('copy');ok()}};
+  let confirmClose=false;
+  $('#mSave').onclick=async()=>{
+    let st=rv('st');const chK=chKey(rv('ch'));
+    const btn=$('#mSave');btn.disabled=true;
+    try{
+      const no=rv('nat')==='ไม่นัด';
+      if(st==='เลื่อนนัด'&&no){btn.disabled=false;return toast('เลือก "เลื่อนนัด" ร่วมกับ "ไม่นัด" ไม่ได้')}
+      if(no&&CLOSED.includes(rv('nnr'))&&!confirmClose){confirmClose=true;btn.disabled=false;btn.textContent='ยืนยันปิดเคส ('+rv('nnr')+')';return}
+      if(st==='เลื่อนนัด'){const d=$('#vNext').value;const r=await api('reschedule',a.aid,d);upsertAppt(r);closeM();toast('เลื่อนนัดเป็น '+thDate(d));render();return}
+      const d={aid:a.aid,date:a.date,status:st==='ขาด'?'ขาด':'มา',ch:chK,rel:st==='ญาติรับยาแทน'?'TRUE':'',
+        bp:$('#vBp').value,pr:$('#vP').value,bw:$('#vBw').value,q2:$('#v2q').value,q9:$('#v9q').value,q8:$('#v8q').value,
+        sym:rv('sym'),ctl:rv('ctl'),adh:rv('adh'),sub:rv('sub')||'',risk:rv('risk'),med:rv('med'),medDetail:$('#vMedD').value,disp:rv('disp'),fee:rv('fee'),
+        note:$('#vNote').value,nat:chKey(rv('nat')),ship:$('#vShip').value,next:no?'':$('#vNext').value,noNext:no,noNextReason:no?rv('nnr'):'',noNextNote:no?$('#vNoNote').value.trim():'',hist:st==='ขาด'?'':$('#vHos').value,wl:Object.assign(wlRead(),{date:a.date,hn:a.hn})};
+      const r=await api('recordVisit',d);applyVisit(r);closeM();toast(no?`บันทึกแล้ว — ไม่นัด (${d.noNextReason})`:`บันทึกแล้ว — นัดครั้งถัดไป ${thDate(r.next.date)}`);render();
+    }catch(e){btn.disabled=false;fail(e)}
+  };
+}
+
+/* ผู้ป่วยนอกนัด: ค้นหาผู้ป่วยแล้วสร้างนัดวันนี้ */
+function pickPatientForWalkin(){
+  modal(`<h3>ผู้ป่วยนอกนัด</h3><input type="text" id="wq" placeholder="พิมพ์ HN หรือชื่อ อย่างน้อย 2 ตัวอักษร"><div id="wres" class="rows" style="max-height:50vh;overflow:auto"></div>
+  <div class="mfoot"><button class="btn" id="wNew">+ ลงทะเบียนผู้ป่วยใหม่</button><span class="spacer"></span><button class="btn ghost" id="mCancel">ปิด</button></div>`);
+  $('#mCancel').onclick=closeM;$('#wNew').onclick=()=>openPatientForm(null,true);
+  $('#wq').focus();
+  $('#wq').oninput=()=>{const q=$('#wq').value.trim();if(q.length<2){$('#wres').innerHTML='';return}
+    const l=D.patients.filter(p=>p.hn.includes(q)||(p.name||'').includes(q)).slice(0,20);
+    $('#wres').innerHTML=l.map(p=>`<div class="row pend"><div class="who2"><span class="nm">${esc(p.name)}</span><span class="meta"><span class="mono">HN ${esc(p.hn)}</span><span>${esc(p.pcu)}</span></span></div><div class="act"><button class="btn sm primary" data-w="${esc(p.hn)}">เพิ่มนัดวันที่เลือก</button></div></div>`).join('')||'<p class="muted">ไม่พบ</p>';
+    document.querySelectorAll('[data-w]').forEach(b=>b.onclick=async()=>{b.disabled=true;
+      try{const r=await api('newAppointment',{hn:b.dataset.w,date:state.day,ch:'tele'});upsertAppt(r.appt);closeM();toast('เพิ่มในรายการวันที่ '+thDate(state.day));vToday()}catch(e){b.disabled=false;fail(e)}});
+  };
+}
+
+/* ================= ติดตามขาดนัด ================= */
+function vFu(){
+  let l=fuList();const pf=state.fuPcu;if(pf!=='all')l=l.filter(a=>P(a.hn).pcu===pf);
+  const days=a=>diffDays(a.date,D.today);
+  const b={a:l.filter(a=>days(a)<=30).length,b:l.filter(a=>days(a)>30&&days(a)<=S.lostDays).length,c:l.filter(a=>days(a)>S.lostDays).length};
+  $('#main').innerHTML=`
+  <div class="bar"><h2>ติดตามผู้ขาดนัด</h2><span class="muted">${l.length} ราย ที่ยังไม่มีนัดใหม่</span><div class="spacer"></div>
+    <select id="fuP" aria-label="รพ.สต."><option value="all">ทุก รพ.สต.</option>${PCUS.map(x=>`<option ${x===pf?'selected':''}>${esc(x)}</option>`).join('')}</select></div>
+  <div class="counts"><span class="pill wait"><span class="sev" style="background:var(--accent)"></span>≤ 30 วัน ${b.a}</span><span class="pill warn"><span class="sev" style="background:var(--warn)"></span>31–${S.lostDays} วัน ${b.b}</span><span class="pill bad"><span class="sev" style="background:var(--bad)"></span>&gt; ${S.lostDays} วัน (ขาดการรักษา) ${b.c}</span></div>
+  <section class="panel"><div class="tw"><table><thead><tr><th>ผู้ป่วย</th><th>HN</th><th>กลุ่ม</th><th>รพ.สต. ฐาน</th><th>โทร</th><th>ขาดนัดวันที่</th><th class="num">วัน</th><th>สถานะติดตาม</th><th></th></tr></thead><tbody>
+  ${l.map(a=>{const p=P(a.hn),d=days(a),c=d>S.lostDays?'var(--bad)':d>30?'var(--warn)':'var(--accent)';const opts=FU.includes(a.fu)?FU:[a.fu||'รอติดตาม',...FU];
+    return `<tr><td><span class="sev" style="background:${c}"></span><button type="button" class="pv" data-pv="${esc(p.hn)}">${esc(p.name)}</button></td><td class="mono">${esc(p.hn)}</td><td><span class="chip ${p.g}">${GRP[p.g]||''}</span></td><td>${esc(p.pcu)}</td><td class="mono">${esc(p.phone||'-')}${p.caregiver?`<div class="muted" style="font-size:11.5px;font-family:var(--f-ui)">${esc(p.caregiver)}</div>`:''}</td><td>${thDate(a.date)}</td><td class="num" style="font-weight:600;color:${c}">${d}</td>
+    <td><select data-fu="${a.aid}" aria-label="สถานะติดตาม" style="width:auto;padding:5px 8px;font-size:13px">${[...new Set(opts)].map(f=>`<option ${a.fu===f?'selected':''}>${esc(f)}</option>`).join('')}</select></td>
+    <td><button class="btn sm primary" data-re="${a.aid}">นัดใหม่</button></td></tr>`}).join('')||'<tr><td colspan="9" class="muted">ไม่มีผู้ขาดนัดค้างติดตาม</td></tr>'}
+  </tbody></table></div></section>`;
+  $('#fuP').onchange=e=>{state.fuPcu=e.target.value;vFu()};
+  document.querySelectorAll('[data-fu]').forEach(s=>s.onchange=async()=>{const a=D.appts.find(x=>x.aid===s.dataset.fu);
+    try{await api('setFollowUp',a.aid,s.value);a.fu=s.value;toast('อัปเดตสถานะติดตามแล้ว')}catch(e){fail(e)}});
+  document.querySelectorAll('[data-re]').forEach(b=>b.onclick=()=>{
+    const a=D.appts.find(x=>x.aid===b.dataset.re);const p=P(a.hn);const nd=snap(addDays(D.today,1));
+    modal(`<h3>นัดใหม่ — ${esc(p.name)}</h3><div class="fgrid"><label class="fl"><span>วันนัด</span><input type="date" id="reD" value="${nd}"></label>
+      <div class="fl"><span>ช่องทาง</span>${seg('rch',[...CHK,'home'].map(k=>CH[k]),CH.tele)}</div></div>
+      <div class="mfoot"><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn primary" id="mSave">บันทึกนัด</button></div>`);
+    $('#mCancel').onclick=closeM;
+    $('#mSave').onclick=async()=>{const d=$('#reD').value;if(!okDate(d))return;const ch=chKey(rv('rch'));$('#mSave').disabled=true;
+      try{const r=await api('newAppointment',{hn:a.hn,date:d,ch,fromAid:a.aid});upsertAppt(r.appt);upsertAppt(r.from);closeM();toast('นัดใหม่ '+thDate(d)+' แล้ว');renderTabs();vFu()}catch(e){$('#mSave').disabled=false;fail(e)}};
+  });
+}
+
+/* ================= SMIV ================= */
+const isSmiv=p=>p.clinic==='SMIV';
+const SMIV={
+  type:['ผู้ป่วยจิตเวชเดิม','ออกจากเรือนจำ','ยังไม่เคยรักษา มีอาการต้องติดตาม','สารเสพติดร่วม ก่อความรุนแรง','อื่นๆ'],
+  ev:['ส่งต่อ','รับกลับ','ติดตาม','ส่งเอกสารหน่วยงาน','อื่นๆ'],
+  hosp:['รพ.แพร่','รพ.สวนปรุง','รพ.ธัญญารักษ์เชียงใหม่','มินิธัญญารักษ์','สถาบันกัลยาณ์ราชนครินทร์','รพ.ศรีธัญญา','เรือนจำจังหวัดแพร่'],
+  nextPlace:['นัดต่อที่ รพ.แพร่','รับยาต่อที่ รพ.ร้องกวาง','Tele ฐาน รพ.สต.','ฉีดยาที่ รพ.ร้องกวาง','รพ.อื่น','ยังไม่มีนัด'],
+  method:['โทรศัพท์','เยี่ยมบ้าน','ผ่าน อสม.','ผ่าน รพ.สต.','ผ่านตำรวจ/ผู้นำชุมชน','ญาติมาติดต่อ'],
+  fail:['ไม่รับสาย/ติดต่อไม่ได้','ไม่พบตัว','ย้ายที่อยู่','ปฏิเสธการรักษา','ถูกควบคุมตัว/อยู่เรือนจำ','อื่นๆ'],
+  agency:['สภ. (ตำรวจ)','ศาล','คุมประพฤติ','เรือนจำ','อื่นๆ'],
+  doc:['หนังสือตอบกลับ','รายงานผลการรักษา','ใบรับรองแพทย์','สรุปประวัติการรักษา','อื่นๆ']
+};
+const vlOf=hn=>(D.smiv||[]).filter(v=>v.hn===hn).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(a.lid<b.lid?1:-1));
+function logText(v){
+  if(v.type==='ส่งต่อ')return `ส่งต่อ ${v.hosp||''}${v.reason?' · '+v.reason:''}`;
+  if(v.type==='รับกลับ')return `รับกลับจาก ${v.hosp||''}${v.nextPlace?' · '+v.nextPlace:''}${okDate(v.nextDate)?' '+thDate(v.nextDate):''}`;
+  if(v.type==='ติดตาม')return `${v.result||'ติดตาม'}${v.method?' ('+v.method+')':''}${v.result==='ติดตามไม่ได้'&&v.reason?' · '+v.reason:''}`;
+  if(v.type==='ส่งเอกสารหน่วยงาน')return `ส่ง${v.docType||'เอกสาร'} → ${v.agencyName||v.agency||''}${v.docNo?' ที่ '+v.docNo:''}`;
+  return v.note||v.type;
+}
+function smivData(){
+  const ld=lastDone(),pend=pendingSet();
+  const nextOf={},lastCome={};
+  D.appts.forEach(a=>{if(a.status==='นัด'&&(!nextOf[a.hn]||a.date<nextOf[a.hn].date))nextOf[a.hn]=a;if(a.status==='มา'&&(!lastCome[a.hn]||a.date>lastCome[a.hn]))lastCome[a.hn]=a.date});
+  const lastW={},wSm={};D.wl.forEach(w=>{if(!lastW[w.hn]||w.date>lastW[w.hn])lastW[w.hn]=w.date;if(w.clinic==='SMIV')wSm[w.hn]=1});
+  const riskHn={};D.appts.forEach(a=>{if(a.status==='มา'&&a.risk==='มี')riskHn[a.hn]=1});
+  const rows=D.patients.filter(p=>isSmiv(p)&&!CLOSED.includes(p.status)).map(p=>{
+    const st=pStatus(p,ld,pend);const logs=vlOf(p.hn);
+    const fol=logs.find(v=>v.type==='ติดตาม');const mv=logs.find(v=>v.type==='ส่งต่อ'||v.type==='รับกลับ');
+    const atHosp=mv&&mv.type==='ส่งต่อ'?mv.hosp:'';
+    const last=[lastCome[p.hn],lastW[p.hn],logs[0]&&logs[0].date].filter(Boolean).sort().pop()||'';
+    const days=last?diffDays(last,D.today):null;const nx=nextOf[p.hn];
+    const lost=fol&&fol.result==='ติดตามไม่ได้';
+    const alert=!atHosp&&(st==='ขาดการรักษา'||st==='ขาดนัด-รอติดตาม'||lost||(!nx&&!(mv&&mv.type==='รับกลับ'&&okDate(mv.nextDate)&&mv.nextDate>=D.today)));
+    return{p,st,logs,fol,mv,atHosp,last,days,nx,lost,alert};
+  });
+  const cand=D.patients.filter(p=>!isSmiv(p)&&!CLOSED.includes(p.status)&&(riskHn[p.hn]||wSm[p.hn]));
+  return{rows,cand};
+}
+function vSmiv(){
+  const {rows,cand}=smivData();const hasMine=rows.some(x=>myPt(x.p));
+  let l=rows;
+  if(state.smivN==='mine')l=l.filter(x=>myPt(x.p));
+  if(state.smivF==='alert')l=l.filter(x=>x.alert);else if(state.smivF==='hosp')l=l.filter(x=>x.atHosp);else if(state.smivF==='lost')l=l.filter(x=>x.lost);
+  if(state.smivT&&state.smivT!=='all')l=l.filter(x=>(x.p.smivType||'')===state.smivT);
+  const sev=x=>x.lost?0:x.st==='ขาดการรักษา'?1:x.alert?2:x.atHosp?3:4;
+  l.sort((a,b)=>sev(a)-sev(b)||(b.days??9999)-(a.days??9999));
+  const k={all:rows.length,hosp:rows.filter(x=>x.atHosp).length,lost:rows.filter(x=>x.lost).length,alert:rows.filter(x=>x.alert).length,
+    m:new Set([...D.wl.filter(w=>w.date.slice(0,7)===D.today.slice(0,7)&&!/ติดตามไม่ได้/.test(w.note||'')).map(w=>w.hn),...(D.smiv||[]).filter(v=>v.type==='ติดตาม'&&v.result==='ติดตามได้'&&v.date.slice(0,7)===D.today.slice(0,7)).map(v=>v.hn)].filter(h=>rows.some(x=>x.p.hn===h))).size};
+  const color=x=>x.lost||x.st==='ขาดการรักษา'?'var(--bad)':x.alert?'var(--warn)':x.atHosp?'var(--accent)':'var(--ok)';
+  $('#main').innerHTML=`
+  <div class="bar"><h2>ผู้ป่วย SMIV</h2><span class="muted">ผู้ป่วยจิตเวชเสี่ยงก่อความรุนแรง · ออกจากเรือนจำ · มีอาการยังไม่เคยรักษา</span><div class="spacer"></div>
+    ${hasMine?`<select id="sN" aria-label="พยาบาล"><option value="all">ทุกพยาบาล</option><option value="mine" ${state.smivN==='mine'?'selected':''}>ผู้ป่วยของฉัน</option></select>`:''}
+    <select id="sT" aria-label="ประเภท"><option value="all">ทุกประเภท</option>${SMIV.type.map(t=>`<option ${t===state.smivT?'selected':''}>${t}</option>`).join('')}</select>
+    <select id="sF" aria-label="สถานะ"><option value="all">ทุกสถานะ</option><option value="alert">ต้องติดตาม</option><option value="lost">ติดตามไม่ได้</option><option value="hosp">อยู่ระหว่างส่งต่อ</option></select>
+    <button class="btn primary sm" id="sAdd">+ เพิ่มผู้ป่วย SMIV</button></div>
+  <div class="kpis">
+    <div class="kpi"><span class="l">ผู้ป่วย SMIV</span><span class="v">${k.all}</span><span class="s">${SMIV.type.map(t=>{const n=rows.filter(x=>x.p.smivType===t).length;return n?t.split(' ')[0]+' '+n:''}).filter(Boolean).join(' · ')||'ยังไม่ระบุประเภท'}</span></div>
+    <div class="kpi bad"><span class="l">ต้องติดตาม</span><span class="v">${k.alert}</span><span class="s">ขาดนัด / ไม่มีนัด / ติดตามไม่ได้</span></div>
+    <div class="kpi bad"><span class="l">ติดตามไม่ได้ (ครั้งล่าสุด)</span><span class="v">${k.lost}</span><span class="s">ประสาน รพ.สต. / ตำรวจ / ผู้นำชุมชน</span></div>
+    <div class="kpi"><span class="l">อยู่ระหว่างส่งต่อ</span><span class="v">${k.hosp}</span><span class="s">ยังไม่มีบันทึกรับกลับ</span></div>
+    <div class="kpi ok"><span class="l">ได้รับบริการ/ติดตามได้ เดือนนี้</span><span class="v">${k.m}</span><span class="s">ราย</span></div>
+  </div>
+  <section class="panel"><div class="tw"><table><thead><tr><th>ผู้ป่วย</th><th>ประเภท</th><th>พยาบาล</th><th>โทร</th><th>สถานะล่าสุด</th><th>ติดตาม</th><th class="num">ห่าง (วัน)</th><th>นัดถัดไป</th><th></th></tr></thead><tbody>
+  ${l.map(x=>{const p=x.p;const lg=x.logs[0];return `<tr><td><span class="sev" style="background:${color(x)}"></span><button type="button" class="pv" data-pv="${esc(p.hn)}">${esc(p.name)}</button><div class="muted mono" style="font-size:11.5px">${esc(p.hn)}${p.icd?' · '+esc(p.icd):''}</div></td>
+    <td style="font-size:12.5px">${esc(p.smivType||'–')}</td><td style="font-size:12.5px">${esc(nurseName(p.nurse))||'–'}</td>
+    <td class="mono" style="font-size:12.5px">${esc(p.phone||'-')}${p.caregiver?`<div class="muted" style="font-size:11px;font-family:var(--f-ui)">${esc(p.caregiver)}</div>`:''}</td>
+    <td style="font-size:12.5px;max-width:260px">${lg?`<b>${thDate(lg.date)}</b> ${esc(logText(lg))}`:`<span class="muted">${esc(x.st)}</span>`}</td>
+    <td>${x.fol?`<span class="pill ${x.lost?'bad':'ok'}">${x.lost?'ไม่ได้':'ได้'}</span><div class="muted" style="font-size:11px">${thDate(x.fol.date)}</div>`:'<span class="muted">–</span>'}</td>
+    <td class="num" style="font-weight:600;color:${x.days>90?'var(--bad)':x.days>30?'var(--warn)':'var(--ink)'}">${x.days??'–'}</td>
+    <td style="font-size:12.5px">${x.nx?thDate(x.nx.date)+'<div class="muted" style="font-size:11px">'+esc(CHS[x.nx.ch]||'')+'</div>':x.mv&&x.mv.type==='รับกลับ'&&okDate(x.mv.nextDate)?thDate(x.mv.nextDate)+'<div class="muted" style="font-size:11px">'+esc(x.mv.nextPlace||'')+'</div>':'<span class="muted">–</span>'}</td>
+    <td style="white-space:nowrap"><button class="btn sm primary" data-slg="${esc(p.hn)}">+ บันทึก</button><button class="btn sm ghost" data-shs="${esc(p.hn)}">ประวัติ</button>${x.nx?'':`<button class="btn sm ghost" data-sap="${esc(p.hn)}">นัด</button>`}</td></tr>`}).join('')||'<tr><td colspan="9" class="muted">ไม่มีผู้ป่วยในกลุ่มนี้</td></tr>'}
+  </tbody></table></div></section>
+  ${cand.length?`<section class="panel"><h3>ผู้ป่วยที่อาจเข้ากลุ่ม SMIV (${cand.length} ราย)</h3><p class="sub">มีการบันทึก SMI-V = มี หรือ Workload คลินิก SMIV แต่ในทะเบียนยังไม่ได้จัดเป็น SMIV</p>
+    <div class="tw"><table><thead><tr><th>ผู้ป่วย</th><th>HN</th><th>คลินิกปัจจุบัน</th><th>พยาบาล</th><th></th></tr></thead><tbody>
+    ${cand.map(p=>`<tr><td>${esc(p.name)}</td><td class="mono">${esc(p.hn)}</td><td>${esc(p.clinic||'-')}</td><td>${esc(nurseName(p.nurse))}</td><td><button class="btn sm primary" data-smk="${esc(p.hn)}">จัดเป็น SMIV</button></td></tr>`).join('')}
+    </tbody></table></div></section>`:''}`;
+  $('#sF').value=state.smivF;
+  if($('#sN'))$('#sN').onchange=e=>{state.smivN=e.target.value;vSmiv()};
+  $('#sF').onchange=e=>{state.smivF=e.target.value;vSmiv()};$('#sT').onchange=e=>{state.smivT=e.target.value;vSmiv()};
+  $('#sAdd').onclick=()=>openPatientForm({clinic:'SMIV',right:'UC',status:'รักษาต่อเนื่อง',smivType:'ผู้ป่วยจิตเวชเดิม',nurse:D.user.code},false,true);
+  document.querySelectorAll('[data-slg]').forEach(b=>b.onclick=()=>smivLogModal(b.dataset.slg));
+  document.querySelectorAll('[data-shs]').forEach(b=>b.onclick=()=>smivHistory(b.dataset.shs));
+  document.querySelectorAll('[data-sap]').forEach(b=>b.onclick=()=>apptModal(b.dataset.sap,()=>vSmiv()));
+  document.querySelectorAll('[data-smk]').forEach(b=>b.onclick=async()=>{b.disabled=true;
+    try{const full=await api('getPatientFull',b.dataset.smk);delete full.cid;full.clinic='SMIV';full.smivType=full.smivType||'ผู้ป่วยจิตเวชเดิม';const r=await api('savePatient',full,'');
+      const i=D.patients.findIndex(x=>x.hn===r.patient.hn);if(i>=0)D.patients[i]=r.patient;index();toast('จัดเข้ากลุ่ม SMIV แล้ว');renderTabs();vSmiv()}catch(e){b.disabled=false;fail(e)}});
+}
+/* ประวัติ SMIV รายคน */
+function smivHistory(hn){
+  const p=P(hn);const logs=vlOf(hn);
+  const ev=[...logs.map(v=>({d:v.date,k:'log',v})),
+    ...D.appts.filter(a=>a.hn===hn&&(a.status==='มา'||a.status==='ขาด')).map(a=>({d:a.date,k:'appt',a})),
+    ...D.wl.filter(w=>w.hn===hn&&!w.aid).map(w=>({d:w.date,k:'wl',w}))].sort((a,b)=>a.d<b.d?1:-1).slice(0,60);
+  const col={'ส่งต่อ':'var(--accent)','รับกลับ':'var(--ok)','ติดตาม':'var(--warn)','ส่งเอกสารหน่วยงาน':'var(--muted)','อื่นๆ':'var(--muted)'};
+  modal(`<h3>${esc(p.name)} <span class="pill bad" style="font-size:11px">SMIV</span></h3>
+  <div class="muted" style="font-size:13px">${['<span class="mono">HN '+esc(p.hn)+'</span>',esc(p.dx||''),esc(p.smivType||''),okDate(p.smivSince)?'เข้ากลุ่ม '+thDate(p.smivSince):'','ผู้ดูแล '+esc(nurseName(p.nurse)||'-'),'☎ '+esc(p.phone||'-')+' '+esc(p.caregiver||'')].filter(Boolean).join(' · ')}</div>
+  <div class="bar"><button class="btn sm primary" id="hAdd">+ บันทึก SMIV</button><button class="btn sm" id="hEd">แก้ไขข้อมูลผู้ป่วย</button><span class="spacer"></span><button class="btn sm ghost" id="mCancel">ปิด</button></div>
+  <div style="display:grid;gap:8px">${ev.map(e=>{
+    if(e.k==='log'){const v=e.v;return `<div class="row" style="border-left-color:${col[v.type]||'var(--line)'};padding:10px 12px"><div class="who2"><span class="nm" style="font-size:14px">${thDate(v.date)} · ${esc(v.type)}</span>
+      <span style="font-size:13.5px">${esc(logText(v))}</span>
+      ${v.meds?`<span style="font-size:13px;white-space:pre-wrap"><b>ยาใหม่:</b> ${esc(v.meds)}</span>`:''}${v.plan?`<span style="font-size:13px;white-space:pre-wrap"><b>แผนการรักษา:</b> ${esc(v.plan)}</span>`:''}
+      ${v.note?`<span class="muted" style="font-size:12.5px;white-space:pre-wrap">${esc(v.note)}</span>`:''}<span class="muted" style="font-size:11.5px">บันทึกโดย ${esc(nurseName(v.by)||v.by)}</span></div>
+      <div class="act"><button class="btn sm ghost" data-hle="${esc(v.lid)}">แก้ไข</button><button class="btn sm ghost" data-hld="${esc(v.lid)}" style="color:var(--bad)">ลบ</button></div></div>`}
+    if(e.k==='appt'){const a=e.a;return `<div class="row ${a.status==='มา'?'done':'miss'}" style="padding:8px 12px"><div class="who2"><span style="font-size:13.5px">${thDate(a.date)} · นัด ${esc(CHS[a.ch]||'')} — <b>${esc(a.status)}</b>${a.risk==='มี'?' · <b style="color:var(--bad)">SMI-V มี</b>':''}${a.medDetail?' · ปรับยา: '+esc(a.medDetail):''}</span></div></div>`}
+    const w=e.w;return `<div class="row" style="padding:8px 12px"><div class="who2"><span style="font-size:13.5px">${thDate(w.date)} · Workload ${esc(w.point)} · ${esc(w.clinic)}${w.note?' · '+esc(w.note):''}</span></div></div>`;
+  }).join('')||'<p class="muted">ยังไม่มีประวัติ</p>'}</div>`);
+  $('#mCancel').onclick=closeM;$('#hAdd').onclick=()=>smivLogModal(hn);
+  $('#hEd').onclick=async()=>{try{openPatientForm(await api('getPatientFull',hn))}catch(e){fail(e)}};
+  document.querySelectorAll('[data-hle]').forEach(b=>b.onclick=()=>smivLogModal(hn,D.smiv.find(v=>v.lid===b.dataset.hle)));
+  document.querySelectorAll('[data-hld]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await api('deleteSmivLog',b.dataset.hld);D.smiv=D.smiv.filter(v=>v.lid!==b.dataset.hld);toast('ลบแล้ว');smivHistory(hn)}catch(e){fail(e)}});
+}
+/* บันทึกเหตุการณ์ SMIV */
+function smivLogModal(hn,v,type){
+  const p=P(hn);const e=!!v;v=v||{type:type||'ติดตาม',date:D.today,result:'ติดตามได้',method:'โทรศัพท์'};
+  const t=v.type;
+  const dl=(id,list)=>`<datalist id="${id}">${list.map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`;
+  let f='';
+  if(t==='ส่งต่อ')f=`<div class="fgrid"><label class="fl"><span>ส่งต่อไปที่</span><input type="text" id="lHosp" list="dlH" value="${esc(v.hosp)}" placeholder="เช่น รพ.แพร่">${dl('dlH',SMIV.hosp)}</label>
+    <label class="fl"><span>นำส่งโดย</span><input type="text" id="lMethod" list="dlM2" value="${esc(v.method)}" placeholder="ญาติ / ตำรวจ / รถ รพ.">${dl('dlM2',['ญาตินำส่ง','ตำรวจนำส่ง','รถ รพ. / EMS','ผู้นำชุมชนนำส่ง'])}</label></div>
+    <label class="fl"><span>อาการ / เหตุผลที่ส่งต่อ</span><textarea id="lReason">${esc(v.reason)}</textarea></label>`;
+  else if(t==='รับกลับ')f=`<label class="fl"><span>รับกลับมาจาก</span><input type="text" id="lHosp" list="dlH" value="${esc(v.hosp)}" placeholder="เช่น รพ.สวนปรุง">${dl('dlH',SMIV.hosp)}</label>
+    <label class="fl"><span>ยาที่ได้มาใหม่</span><textarea id="lMeds" placeholder="เช่น fluphenazine decanoate 25 mg IM ทุก 4 สัปดาห์">${esc(v.meds)}</textarea></label>
+    <label class="fl"><span>แผนการรักษา</span><textarea id="lPlan">${esc(v.plan)}</textarea></label>
+    <div class="fl"><span>นัดต่อที่</span>${seg('lNp',SMIV.nextPlace,v.nextPlace||'นัดต่อที่ รพ.แพร่')}</div>
+    <div class="fgrid"><label class="fl"><span>วันนัดต่อ</span><input type="date" id="lNd" value="${esc(v.nextDate)}"></label>
+    ${e?'':`<label class="fl"><span>&nbsp;</span><label class="chip ck"><input type="checkbox" id="lMkAppt"> สร้างนัดในระบบ MindLink ด้วย (เมื่อนัดที่ร้องกวาง/Tele)</label></label>`}</div>`;
+  else if(t==='ติดตาม')f=`<div class="fl"><span>ผลการติดตาม</span>${seg('lRes',['ติดตามได้','ติดตามไม่ได้'],v.result||'ติดตามได้')}</div>
+    <div class="fl"><span>วิธีติดตาม</span>${seg('lMet',SMIV.method,v.method||'โทรศัพท์')}</div>
+    <label class="fl"><span>ถ้าติดตามไม่ได้ — สาเหตุ</span><input type="text" id="lReason" list="dlF" value="${esc(v.reason)}">${dl('dlF',SMIV.fail)}</label>
+    ${e?'':`<label class="chip ck"><input type="checkbox" id="lWl" checked> ลง Workload ด้วย (คลินิก SMIV)</label>`}`;
+  else if(t==='ส่งเอกสารหน่วยงาน')f=`<div class="fl"><span>หน่วยงาน</span>${seg('lAg',SMIV.agency,v.agency||'สภ. (ตำรวจ)')}</div>
+    <div class="fgrid"><label class="fl"><span>ชื่อหน่วยงาน</span><input type="text" id="lAgN" value="${esc(v.agencyName)}" placeholder="เช่น สภ.ร้องกวาง / สำนักงานคุมประพฤติจังหวัดแพร่"></label>
+    <label class="fl"><span>เลขที่หนังสือ</span><input type="text" id="lDocNo" value="${esc(v.docNo)}" placeholder="เช่น พร 0032.301/..."></label></div>
+    <div class="fl"><span>ประเภทเอกสาร</span>${seg('lDoc',SMIV.doc,v.docType||'หนังสือตอบกลับ')}</div>`;
+  modal(`<h3>${e?'แก้ไข':'บันทึก'} SMIV — ${esc(p.name)}</h3>
+  ${e?'':`<div class="fl"><span>ประเภทการบันทึก</span>${seg('lType',SMIV.ev,t)}</div>`}
+  <label class="fl"><span>วันที่</span><input type="date" id="lDate" value="${esc(v.date)}"></label>
+  ${f}
+  <label class="fl"><span>หมายเหตุ / รายละเอียดเพิ่มเติม</span><textarea id="lNote">${esc(v.note)}</textarea></label>
+  <div class="mfoot"><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn primary" id="mSave">บันทึก</button></div>`);
+  $('#mCancel').onclick=closeM;
+  if(!e)document.querySelectorAll('input[name="lType"]').forEach(r=>r.onchange=()=>smivLogModal(hn,null,rv('lType')));
+  const val=id=>$(id)?$(id).value.trim():'';
+  $('#mSave').onclick=async()=>{
+    const o={hn,date:$('#lDate').value,type:t,note:val('#lNote')};if(e)o.lid=v.lid;
+    if(!okDate(o.date)){toast('กรุณาเลือกวันที่');return}
+    if(t==='ส่งต่อ')Object.assign(o,{hosp:val('#lHosp'),method:val('#lMethod'),reason:val('#lReason')});
+    if(t==='รับกลับ')Object.assign(o,{hosp:val('#lHosp'),meds:val('#lMeds'),plan:val('#lPlan'),nextPlace:rv('lNp'),nextDate:val('#lNd')});
+    if(t==='ติดตาม')Object.assign(o,{result:rv('lRes'),method:rv('lMet'),reason:val('#lReason')});
+    if(t==='ส่งเอกสารหน่วยงาน')Object.assign(o,{agency:rv('lAg'),agencyName:val('#lAgN'),docNo:val('#lDocNo'),docType:rv('lDoc')});
+    if((t==='ส่งต่อ'||t==='รับกลับ')&&!o.hosp){toast('กรุณาระบุโรงพยาบาล');return}
+    if(t==='ติดตาม'&&$('#lWl')&&$('#lWl').checked){const w=wlDefault(p,'opd',o.date);o.wl=Object.assign(w,{clinic:'SMIV',point:o.method==='โทรศัพท์'?'โทรศัพท์':o.method==='เยี่ยมบ้าน'?'เยี่ยมบ้าน':o.method==='ผ่าน รพ.สต.'?'รพ.สต.':'อื่นๆ เช่น ญาติ ชุมชน',homevisit:o.method==='เยี่ยมบ้าน'?'เยี่ยม':'ไม่เยี่ยม',duration:'<30 นาที',note:'ติดตาม SMIV: '+(o.result||'')})}
+    if(t==='รับกลับ'&&$('#lMkAppt')&&$('#lMkAppt').checked&&okDate(o.nextDate)){o.appt={date:o.nextDate,ch:/Tele/.test(o.nextPlace)?'tele':'opd'}}
+    $('#mSave').disabled=true;
+    try{const r=await api('saveSmivLog',o);const i=D.smiv.findIndex(x=>x.lid===r.log.lid);if(i>=0)D.smiv[i]=r.log;else D.smiv.push(r.log);
+      if(r.wl)applyWl({wl:r.wl});if(r.appt)upsertAppt(r.appt);closeM();toast('บันทึก SMIV แล้ว');renderTabs();if(state.view==='smiv')vSmiv();}catch(err){$('#mSave').disabled=false;fail(err)}
+  };
+}
+function apptModal(hn,after){
+  modal(`<h3>สร้างนัด — ${esc(P(hn).name)}</h3><div class="fgrid"><label class="fl"><span>วันนัด</span><input type="date" id="apD" value="${snap(addDays(D.today,1))}"></label><div class="fl"><span>ช่องทาง</span>${seg('apc',[...CHK,'home'].map(k=>CH[k]),CH.tele)}</div></div>
+  <div class="mfoot"><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn primary" id="mSave">บันทึกนัด</button></div>`);
+  $('#mCancel').onclick=closeM;$('#mSave').onclick=async()=>{const d=$('#apD').value;const ch=chKey(rv('apc'));
+    try{const r=await api('newAppointment',{hn,date:d,ch});upsertAppt(r.appt);closeM();toast('สร้างนัด '+thDate(d)+' แล้ว');renderTabs();after&&after()}catch(e){fail(e)}};
+}
+
+/* ================= ทะเบียน ================= */
+function vReg(){
+  const q=state.regQ.trim();const ld=lastDone(),pend=pendingSet();
+  const nextOf={},lastOf={};D.appts.forEach(a=>{if(a.status==='นัด'&&(!nextOf[a.hn]||a.date<nextOf[a.hn]))nextOf[a.hn]=a.date;if(a.status==='มา'&&(!lastOf[a.hn]||a.date>lastOf[a.hn]))lastOf[a.hn]=a.date});
+  let l=D.patients.map(p=>Object.assign({},p,{_st:pStatus(p,ld,pend)}));
+  if(q)l=l.filter(p=>(p.name||'').includes(q)||p.hn.includes(q)||(p.pcu||'').includes(q)||(p.dx||'').toUpperCase().includes(q.toUpperCase()));
+  if(state.regF!=='all')l=l.filter(p=>p._st===state.regF);
+  if(state.regN==='mine')l=l.filter(myPt);else if(state.regN==='none')l=l.filter(p=>!p.nurse);else if(state.regN!=='all')l=l.filter(p=>p.nurse===state.regN);
+  if(state.regC!=='all')l=l.filter(p=>(p.clinic||'')===state.regC);
+  D.wl.forEach(w=>{if(!lastOf[w.hn]||w.date>lastOf[w.hn])lastOf[w.hn]=w.date});
+  l.sort((a,b)=>(a.name||'').localeCompare(b.name||'','th'));
+  const stc=s=>s==='รักษาต่อเนื่อง'?'ok':s==='ขาดการรักษา'?'bad':CLOSED.includes(s)?'wait':'warn';
+  $('#main').innerHTML=`
+  <div class="bar"><h2>ทะเบียนผู้ป่วย</h2><span class="muted">${l.length} ราย</span><div class="spacer"></div>
+    <select id="rf" aria-label="สถานะ"><option value="all">ทุกสถานะ</option>${['รักษาต่อเนื่อง','ขาดนัด-รอติดตาม','ขาดการรักษา','ไม่มีนัด',...CLOSED].map(s=>`<option ${s===state.regF?'selected':''}>${s}</option>`).join('')}</select>
+    <select id="rn" aria-label="พยาบาลผู้ดูแล"><option value="mine">ผู้ป่วยของฉัน</option><option value="all">ทุกพยาบาล</option>${(D.users||[]).filter(u=>D.patients.some(p=>p.nurse===u.code)).map(u=>`<option value="${esc(u.code)}">${esc(u.name)}</option>`).join('')}<option value="none">ยังไม่ระบุผู้ดูแล</option></select>
+    <select id="rc" aria-label="คลินิก"><option value="all">ทุกคลินิก</option>${WL.clinic.map(x=>`<option ${x===state.regC?'selected':''}>${esc(x)}</option>`).join('')}</select>
+    <input type="text" id="rq" placeholder="ค้นหา HN / ชื่อ / รพ.สต. / ICD-10" value="${esc(q)}" style="width:min(260px,100%)"><button class="btn primary sm" id="addP">+ ลงทะเบียนผู้ป่วยใหม่</button></div>
+  <section class="panel"><div class="tw"><table><thead><tr><th>HN</th><th>ชื่อ-สกุล</th><th>กลุ่ม / Dx</th><th>คลินิก</th><th>พยาบาล</th><th>รพ.สต. ฐาน</th><th>มาล่าสุด</th><th>นัดถัดไป</th><th>สถานะ</th><th></th></tr></thead><tbody>
+  ${l.slice(0,state.regLimit).map(p=>`<tr><td class="mono">${esc(p.hn)}</td><td><button type="button" class="pv" data-pv="${esc(p.hn)}">${esc(p.name)}</button></td><td><span class="chip ${p.g}">${GRP[p.g]||''}</span> <span class="muted" style="font-size:12px">${esc(p.icd)}</span></td><td>${p.clinic==='SMIV'?'<span class="pill bad">SMIV</span>':esc(p.clinic)}</td><td>${esc(nurseName(p.nurse))}</td><td>${esc(p.pcu)||'<span class="muted">–</span>'}</td><td>${thDate(lastOf[p.hn])}</td><td>${thDate(nextOf[p.hn])}</td><td><span class="pill ${stc(p._st)}">${p._st}</span></td>
+    <td style="white-space:nowrap"><button class="btn sm ghost" data-ed="${esc(p.hn)}">แก้ไข</button>${!nextOf[p.hn]&&!CLOSED.includes(p.status)?`<button class="btn sm" data-ap="${esc(p.hn)}">นัด</button>`:''}</td></tr>`).join('')}
+  </tbody></table></div>${l.length>state.regLimit?`<div style="text-align:center;margin-top:10px"><button class="btn sm" id="more">แสดงเพิ่ม (${l.length-state.regLimit})</button></div>`:''}</section>`;
+  const r=$('#rq');r.oninput=()=>{state.regQ=r.value;state.regLimit=50;const pos=r.selectionStart;vReg();const n=$('#rq');n.focus();n.setSelectionRange(pos,pos)};
+  $('#rf').onchange=e=>{state.regF=e.target.value;vReg()};
+  $('#rn').value=state.regN;$('#rn').onchange=e=>{state.regN=e.target.value;state.regLimit=50;vReg()};
+  $('#rc').onchange=e=>{state.regC=e.target.value;state.regLimit=50;vReg()};
+  $('#addP').onclick=()=>openPatientForm(null);
+  if($('#more'))$('#more').onclick=()=>{state.regLimit+=100;vReg()};
+  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{const p=await api('getPatientFull',b.dataset.ed);openPatientForm(p)}catch(e){fail(e)}finally{b.disabled=false}});
+  document.querySelectorAll('[data-ap]').forEach(b=>b.onclick=()=>{const hn=b.dataset.ap;
+    modal(`<h3>สร้างนัด — ${esc(P(hn).name)}</h3><div class="fgrid"><label class="fl"><span>วันนัด</span><input type="date" id="apD" value="${snap(addDays(D.today,1))}"></label><div class="fl"><span>ช่องทาง</span>${seg('apc',[...CHK,'home'].map(k=>CH[k]),CH.tele)}</div></div>
+    <div class="mfoot"><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn primary" id="mSave">บันทึกนัด</button></div>`);
+    $('#mCancel').onclick=closeM;$('#mSave').onclick=async()=>{const d=$('#apD').value;const ch=chKey(rv('apc'));
+      try{const r=await api('newAppointment',{hn,date:d,ch});upsertAppt(r.appt);closeM();toast('สร้างนัด '+thDate(d)+' แล้ว');vReg()}catch(e){fail(e)}}});
+}
+function openPatientForm(p,walkin,preset){
+  const e=!!p&&!preset;p=p||{right:'UC',status:'รักษาต่อเนื่อง'};
+  const grp=Object.entries(GRP);
+  modal(`<h3>${e?'แก้ไขข้อมูลผู้ป่วย':'ลงทะเบียนผู้ป่วยใหม่'}</h3>
+  <div class="fgrid"><label class="fl"><span>HN</span><input type="text" id="nHn" value="${esc(p.hn)}" ${e?'readonly':''}>
+    ${e?`<button type="button" class="btn sm ghost" id="nChHn" style="justify-self:start">${/^T/.test(p.hn)?'ใส่ HN จริง (ตอนนี้เป็น HN ชั่วคราว)':'เปลี่ยน HN'}</button>`:`<label class="chip ck"><input type="checkbox" id="nNoHn"> ยังไม่มี HN (ใช้ HN ชั่วคราว)</label>`}</label>
+  <label class="fl"><span>ชื่อ-สกุล</span><input type="text" id="nName" value="${esc(p.name)}"></label>
+  <label class="fl"><span>วันเกิด</span><input type="date" id="nDob" value="${esc(p.dob)}"></label>
+  <label class="fl"><span>เลขบัตรประชาชน</span><input type="text" id="nCid" value="${esc(p.cid)}" placeholder="13 หลัก"></label>
+  <label class="fl"><span>โทรศัพท์</span><input type="text" id="nTel" value="${esc(p.phone)}"></label>
+  <label class="fl"><span>ผู้ดูแล / เบอร์ติดต่ออื่น</span><input type="text" id="nCg" value="${esc(p.caregiver)}"></label></div>
+  <div class="fl"><span>กลุ่ม</span>${seg('ng',grp.map(x=>x[1]),GRP[p.g]||'จิตเวช')}</div>
+  <div class="fgrid"><label class="fl"><span>ICD-10 หลัก</span><input type="text" id="nIcd" value="${esc(p.icd)}" placeholder="F32"></label>
+  <label class="fl"><span>โรคประจำตัว</span><input type="text" id="nDx" value="${esc(p.dx)}"></label>
+  <label class="fl"><span>รพ.สต. ฐาน</span><select id="nPcu"><option value="">— ยังไม่ระบุ —</option>${PCUS.map(x=>`<option ${x===p.pcu?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
+  <label class="fl"><span>คลินิก</span><select id="nCl">${opt(WL.clinic,p.clinic||'จิตเวช')}</select></label>
+  <label class="fl"><span>พยาบาลผู้ดูแล</span><select id="nNu">${(D.users||[]).map(u=>`<option value="${esc(u.code)}" ${u.code===(p.nurse||D.user.code)?'selected':''}>${esc(u.name)}</option>`).join('')}</select></label>
+  <label class="fl" data-smf><span>ประเภท SMIV</span><select id="nSt2">${opt(['',...SMIV.type],p.smivType||'')}</select></label>
+  <label class="fl" data-smf><span>วันที่เข้ากลุ่ม SMIV</span><input type="date" id="nSs" value="${esc(p.smivSince||'')}"></label>
+  <label class="fl"><span>เพศ</span><select id="nSex">${opt(['','ชาย','หญิง'],p.sex||'')}</select></label>
+  <label class="fl"><span>สิทธิ์การรักษา</span><select id="nRt">${['UC','UC ผู้สูงอายุ','UC ผู้พิการ','เบิกได้','ประกันสังคม','อื่นๆ'].map(x=>`<option ${x===p.right?'selected':''}>${x}</option>`).join('')}</select></label>
+  <label class="fl"><span>แพ้ยา</span><input type="text" id="nAl" value="${esc(p.allergy||'ไม่แพ้')}"></label>
+  <label class="fl"><span>สถานะ</span><select id="nSt">${['รักษาต่อเนื่อง',...CLOSED].map(x=>`<option ${x===p.status?'selected':''}>${x}</option>`).join('')}</select></label></div>
+  <label class="fl"><span>ที่อยู่</span><input type="text" id="nAd" value="${esc(p.addr)}"></label>
+  <label class="fl"><span>ที่อยู่ส่งยา</span><input type="text" id="nSa" value="${esc(p.shipAddr)}"></label>
+  <label class="fl"><span>หมายเหตุผู้ป่วย</span><input type="text" id="nRm" value="${esc(p.remark)}"></label>
+  <label class="fl"><span>ยาที่ใช้</span><textarea id="nMed">${esc(p.meds)}</textarea></label>
+  ${e?'':`<label class="fl"><span>นัดครั้งแรก (เว้นว่างได้)</span><input type="date" id="nD" value="${walkin?state.day:''}"></label>`}
+  <div class="mfoot"><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn primary" id="mSave">บันทึก</button></div>`);
+  $('#mCancel').onclick=closeM;
+  const smf=()=>document.querySelectorAll('[data-smf]').forEach(x=>x.hidden=$('#nCl').value!=='SMIV');smf();$('#nCl').onchange=smf;
+  if($('#nNoHn'))$('#nNoHn').onchange=()=>{$('#nHn').disabled=$('#nNoHn').checked;if($('#nNoHn').checked)$('#nHn').value=''};
+  if($('#nChHn'))$('#nChHn').onclick=()=>{
+    modal(`<h3>เปลี่ยน HN — ${esc(p.name)}</h3><p class="muted">HN เดิม <span class="mono">${esc(p.hn)}</span> · ระบบจะเปลี่ยนในทะเบียน นัด Workload และบันทึก SMIV ทั้งหมด</p>
+    <label class="fl"><span>HN ใหม่</span><input type="text" id="cH"></label><div class="mfoot"><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn primary" id="mSave">เปลี่ยน HN</button></div>`);
+    $('#mCancel').onclick=closeM;$('#mSave').onclick=async()=>{const nh=$('#cH').value.trim();try{await api('changeHn',p.hn,nh);closeM();toast('เปลี่ยน HN แล้ว — กำลังโหลดข้อมูลใหม่');boot()}catch(err){fail(err)}}};
+  $('#mSave').onclick=async()=>{
+    const gk=grp.find(x=>x[1]===rv('ng'))[0];
+    const o={hn:$('#nHn').value.trim(),name:$('#nName').value.trim(),dob:$('#nDob').value,cid:$('#nCid').value.trim(),phone:$('#nTel').value.trim(),caregiver:$('#nCg').value.trim(),
+      g:gk,icd:$('#nIcd').value.trim().toUpperCase(),dx:$('#nDx').value.trim(),pcu:$('#nPcu').value,right:$('#nRt').value,allergy:$('#nAl').value,status:$('#nSt').value,
+      addr:$('#nAd').value,shipAddr:$('#nSa').value,meds:$('#nMed').value,remark:$('#nRm').value,clinic:$('#nCl').value,nurse:$('#nNu').value,sex:$('#nSex').value,smivType:$('#nCl').value==='SMIV'?$('#nSt2').value:(p.smivType||''),smivSince:$('#nCl').value==='SMIV'?$('#nSs').value:(p.smivSince||'')};
+    if($('#nNoHn')&&$('#nNoHn').checked){o.hn='';o.tempHn=true}
+    if(e&&/x/.test(o.cid))delete o.cid;
+    const fd=e?'':($('#nD').value||'');
+    $('#mSave').disabled=true;
+    try{const r=await api('savePatient',o,fd);const i=D.patients.findIndex(x=>x.hn===r.patient.hn);if(i>=0)D.patients[i]=r.patient;else D.patients.push(r.patient);index();if(r.appt)upsertAppt(r.appt);(r.cancelled||[]).forEach(id=>{const a=D.appts.find(x=>x.aid===id);if(a)a.status='ยกเลิก'});
+      closeM();toast('บันทึกข้อมูล '+o.name+' แล้ว');render()}catch(err){$('#mSave').disabled=false;fail(err)}
+  };
+}
+
+/* ================= รายงาน ================= */
+function buildReport(){
+  const r=state.rep;const nm=p=>r.mask?maskName(p.name):p.name,hn=p=>r.mask?maskHN(p.hn):p.hn;
+  const byPcu=a=>r.pcu==='all'||P(a.hn).pcu===r.pcu;
+  const inFy=D.appts.filter(a=>done(a)&&+a.fy===r.fy&&(r.ch==='all'||a.ch===r.ch)&&byPcu(a));
+  const sel=r.month==='all'?inFy:inFy.filter(a=>+a.fym===+r.month);
+  const att=sel.filter(a=>a.status==='มา'),mis=sel.filter(a=>a.status==='ขาด');
+  const per=r.month==='all'?`ปีงบประมาณ ${r.fy} (1 ตุลาคม ${r.fy-1} – 30 กันยายน ${r.fy})`:`เดือน${FYMF[r.month]} ${+r.month<3?r.fy-1:r.fy}`;
+  const extra=[r.ch!=='all'?'ช่องทาง '+CHS[r.ch]:'',r.pcu!=='all'?r.pcu:''].filter(Boolean).join(' · ');
+  const byDate=(a,b)=>a.date<b.date?-1:a.date>b.date?1:0;
+  const place=a=>atPcu(a.ch)?CHS[a.ch]+' '+(P(a.hn).pcu||'').replace('รพ.สต.',''):CHS[a.ch]||'';
+  const sumLine=`นัดทั้งหมด ${sel.length} ครั้ง   มาตามนัด ${att.length} (${pct(att.length,sel.length)}%)   ขาดนัด ${mis.length} (${pct(mis.length,sel.length)}%)`;
+  if(r.type==='attend')return{title:'รายงานผู้ป่วยที่มาตามนัด',lines:[per+(extra?' · '+extra:'')],summary:sumLine,
+    headers:['ที่','วันที่','HN','ชื่อ-สกุล','กลุ่ม','ช่องทาง/สถานที่','การปรับยา','นัดครั้งถัดไป'],widths:[28,60,70,0,70,0,55,70],
+    rows:att.sort(byDate).map((a,i)=>{const p=P(a.hn),nx=D.appts.find(x=>x.aid===a.nextAid);return[String(i+1),thDate(a.date),hn(p),nm(p),GRP[p.g]||'',place(a),a.med||'',nextTxt(a)]})};
+  if(r.type==='miss')return{title:'รายงานผู้ป่วยที่ขาดนัด',lines:[per+(extra?' · '+extra:'')],summary:sumLine,
+    headers:['ที่','วันที่นัด','HN','ชื่อ-สกุล','กลุ่ม','รพ.สต. ฐาน','ผลการติดตาม'],widths:[28,60,70,0,70,0,0],
+    rows:mis.sort(byDate).map((a,i)=>{const p=P(a.hn);return[String(i+1),thDate(a.date),hn(p),nm(p),GRP[p.g]||'',(p.pcu||'').replace('รพ.สต.',''),a.fu||'']})};
+  if(r.type==='smiv'){
+    const {rows}=smivData();const L=rows.filter(x=>r.pcu==='all'||x.p.pcu===r.pcu);
+    return{title:'ทะเบียนผู้ป่วย SMIV และสถานะการติดตาม',lines:['ข้อมูล ณ '+thDateFull(D.today)],
+      summary:`ผู้ป่วย SMIV ${L.length} ราย · ต้องติดตาม ${L.filter(x=>x.alert).length} · ติดตามไม่ได้ ${L.filter(x=>x.lost).length} · อยู่ระหว่างส่งต่อ ${L.filter(x=>x.atHosp).length}`,
+      headers:['ที่','HN','ชื่อ-สกุล','ประเภท','พยาบาล','สถานะล่าสุด','ติดตาม','นัดถัดไป'],widths:[24,62,110,90,70,0,55,70],
+      rows:L.map((x,i)=>{const lg=x.logs[0];return[String(i+1),hn(x.p),nm(x.p),x.p.smivType||'',nurseName(x.p.nurse),lg?thDate(lg.date)+' '+logText(lg):x.st,x.fol?(x.lost?'ไม่ได้ ':'ได้ ')+thDate(x.fol.date):'',x.nx?thDate(x.nx.date):'']})};
+  }
+  if(r.type==='smivlog'){
+    let L=(D.smiv||[]).filter(v=>fyOf(v.date)===r.fy&&(r.month==='all'||fyMonth(v.date)===+r.month)).sort((a,b)=>a.date<b.date?-1:1);
+    const per=r.month==='all'?`ปีงบประมาณ ${r.fy}`:`เดือน${FYMF[r.month]} ${+r.month<3?r.fy-1:r.fy}`;const c={};L.forEach(v=>c[v.type]=(c[v.type]||0)+1);
+    return{title:'บันทึกการส่งต่อ / รับกลับ / ติดตาม / ส่งเอกสาร ผู้ป่วย SMIV',lines:[per],summary:Object.entries(c).map(([k,v])=>k+' '+v).join(' · ')||'ไม่มีรายการ',
+      headers:['ที่','วันที่','HN','ชื่อ-สกุล','ประเภท','รายละเอียด','ผู้บันทึก'],widths:[24,58,62,105,70,0,70],
+      rows:L.map((v,i)=>{const p=P(v.hn);return[String(i+1),thDate(v.date),hn(p),nm(p),v.type,logText(v)+(v.meds?' · ยาใหม่: '+v.meds:'')+(v.plan?' · แผน: '+v.plan:'')+(v.note?' · '+v.note:''),nurseName(v.by)||v.by]})};
+  }
+  if(r.type==='wl'){
+    const L=D.wl.filter(w=>+w.fy===r.fy);const names=[...new Set([...staffList(),...L.flatMap(w=>String(w.staff).split(/\s*,\s*/))])].filter(Boolean);
+    const rows=FYMF.map((m,i)=>{const x=L.filter(w=>+w.fym===i);return[m,...names.map(n=>String(x.filter(w=>String(w.staff).split(/\s*,\s*/).includes(n)).length)),String(x.length),String(new Set(x.map(w=>w.hn)).size)]});
+    rows.push(['รวม',...names.map(n=>String(L.filter(w=>String(w.staff).split(/\s*,\s*/).includes(n)).length)),String(L.length),String(new Set(L.map(w=>w.hn)).size)]);
+    const pts={};L.forEach(w=>pts[w.point||'ไม่ระบุ']=(pts[w.point||'ไม่ระบุ']||0)+1);
+    return{title:'สรุป Workload รายเดือน แยกเจ้าหน้าที่',lines:[`ปีงบประมาณ ${r.fy}`],summary:'จุดให้บริการ: '+Object.entries(pts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+' '+v).join(' · '),
+      headers:['เดือน',...names,'รวม (ครั้ง)','ผู้ป่วย (ราย)'],widths:[],rows};
+  }
+  if(r.type==='wllist'){
+    let L=D.wl.filter(w=>+w.fy===r.fy&&(r.month==='all'||+w.fym===+r.month));
+    if(r.staff!=='all')L=L.filter(w=>String(w.staff).split(/\s*,\s*/).includes(r.staff));
+    L.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+    const per=r.month==='all'?`ปีงบประมาณ ${r.fy}`:`เดือน${FYMF[r.month]} ${+r.month<3?r.fy-1:r.fy}`;
+    return{title:'รายการ Workload คลินิกจิตเวช',lines:[per+(r.staff!=='all'?' · '+r.staff:'')],summary:`${L.length} รายการ · ผู้ป่วย ${new Set(L.map(w=>w.hn)).size} ราย`,
+      headers:['ที่','วันที่','HN','ชื่อ-สกุล','จุดให้บริการ','คลินิก','ประเมิน','ให้คำปรึกษา','ระยะเวลา','ความรุนแรง','เจ้าหน้าที่'],widths:[],
+      rows:L.map((w,i)=>{const p=P(w.hn);return[String(i+1),thDate(w.date),hn(p),nm(p),w.point,w.clinic,w.assess,w.counsel,w.duration,w.severity,w.staff]})};
+  }
+  if(r.type==='rx'){
+    const all=D.appts.filter(a=>a.date===r.day&&a.status==='มา'&&isTele(a.ch)&&byPcu(a));
+    const noRx=a=>a.disp==='วันนี้ไม่จ่ายยา'||a.fee==='วันนี้ไม่ส่งยา';
+    const self=a=>a.fee==='มารับยาเองที่ รพ.';
+    const byName=(a,b)=>(P(a.hn).pcu||'').localeCompare(P(b.hn).pcu||'','th')||(P(a.hn).name||'').localeCompare(P(b.hn).name||'','th');
+    const rider=all.filter(a=>!noRx(a)&&!self(a)).sort(byName), pick=all.filter(a=>!noRx(a)&&self(a)).sort(byName);
+    const paid=rider.filter(a=>/65/.test(a.fee||'')).length, skip=all.length-rider.length-pick.length;
+    return{title:'รายชื่อผู้ป่วย Telemed ส่งห้องยา — จัดยา / จัดส่งทาง rider',lines:[thDateFull(r.day)+(extra?' · '+extra:'')],
+      summary:`จัดยาทั้งหมด ${rider.length+pick.length} ราย · ส่ง rider ${rider.length} ราย (ฟรี UC ${rider.length-paid} · ชำระ 65 บาท ${paid} ราย รวม ${paid*65} บาท) · รับยาเองที่ รพ. ${pick.length} ราย${skip?` · ไม่จ่าย/ไม่ส่งยาวันนี้ ${skip} ราย`:''}`,
+      headers:['ที่','การรับยา','HN','ชื่อ-สกุล','โทร','ที่อยู่ส่งยา','ช่องทาง','ค่าส่ง','การปรับยา','นัดครั้งถัดไป','ผู้รับยา/หมายเหตุ'],widths:[24,52,62,100,68,0,55,42,85,55,65],
+      rows:[...rider,...pick].map((a,i)=>{const p=P(a.hn),nx=D.appts.find(x=>x.aid===a.nextAid),sf=self(a);
+        return[String(i+1),sf?'รับเองที่ รพ.':'ส่ง rider',hn(p),nm(p),r.mask?'':(p.phone||''),sf?'-':(r.mask?'':(a.ship||p.shipAddr||p.addr||'')),CHS[a.ch]+' '+(p.pcu||'').replace('รพ.สต.',''),sf?'-':/65/.test(a.fee||'')?'65 บาท':'ฟรี',
+          (a.med||'')+(a.medDetail?': '+a.medDetail:'')+(a.disp&&a.disp!=='ยาเดิม'?' · '+a.disp:''),nextTxt(a),'']})};
+  }
+  if(r.type==='appt'){const l=D.appts.filter(a=>a.date===r.day&&['นัด','มา','ขาด'].includes(a.status)&&byPcu(a)&&(r.ch==='all'||a.ch===r.ch)).sort((a,b)=>(P(a.hn).pcu||'').localeCompare(P(b.hn).pcu||'','th'));
+    return{title:'รายชื่อผู้ป่วยนัด '+thDateFull(r.day),lines:[extra||'ทุก รพ.สต.'],summary:`จำนวน ${l.length} ราย`,
+    headers:['ที่','HN','ชื่อ-สกุล','รพ.สต. ฐาน','โทร','ช่องทาง','หมายเหตุ'],widths:[28,70,0,0,80,70,90],
+    rows:l.map((a,i)=>{const p=P(a.hn);return[String(i+1),hn(p),nm(p),(p.pcu||'').replace('รพ.สต.',''),r.mask?'':(p.phone||''),CHS[a.ch]||'','']})}}
+  const rows=FYMF.map((m,i)=>{const x=inFy.filter(a=>+a.fym===i),o=x.filter(a=>a.status==='มา').length,t=x.filter(a=>a.status==='มา'&&isTele(a.ch)).length;return[m,String(x.length),String(o),String(x.length-o),x.length?pct(o,x.length).toFixed(1):'-',String(t)]});
+  const tO=inFy.filter(a=>a.status==='มา').length;
+  rows.push(['รวม',String(inFy.length),String(tO),String(inFy.length-tO),pct(tO,inFy.length).toFixed(1),String(inFy.filter(a=>a.status==='มา'&&isTele(a.ch)).length)]);
+  return{title:'สรุปผลการติดตามผู้ป่วยรายเดือน',lines:[`ปีงบประมาณ ${r.fy}`+(extra?' · '+extra:'')],summary:'',headers:['เดือน','นัด (ครั้ง)','มาตามนัด','ขาดนัด','ร้อยละมาตามนัด','Telemed'],widths:[0,70,70,70,90,70],rows};
+}
+function vRep(){
+  const r=state.rep;const R=buildReport();
+  $('#main').innerHTML=`
+  <div class="bar noprint"><h2>รายงาน / PDF</h2><div class="spacer"></div>
+    <select id="rT" aria-label="ประเภทรายงาน"><option value="miss">ผู้ขาดนัด</option><option value="attend">ผู้มาตามนัด</option><option value="sum">สรุปรายเดือน (ทั้งปีงบ)</option><option value="appt">รายชื่อนัดรายวัน (ส่ง รพ.สต.)</option><option value="smiv">SMIV — ทะเบียนและสถานะติดตาม</option><option value="smivlog">SMIV — บันทึกส่งต่อ/รับกลับ/ติดตาม/เอกสาร</option><option value="wl">Workload สรุปรายเดือน แยกเจ้าหน้าที่</option><option value="wllist">Workload รายการ (แบบไฟล์เดิม)</option><option value="rx">ส่งห้องยา — ผู้ป่วย Tele (rider + รับเอง)</option></select>
+    ${r.type==='appt'||r.type==='rx'?`<input type="date" id="rD" value="${r.day}" style="width:auto">`:`<select id="rF" aria-label="ปีงบ">${fyOptions(r.fy)}</select>
+    <select id="rM" aria-label="เดือน" ${r.type==='sum'||r.type==='wl'||r.type==='smiv'?'disabled':''}><option value="all">ทั้งปีงบ</option>${FYMF.map((x,i)=>`<option value="${i}">${x}</option>`).join('')}</select>`}
+    ${r.type==='wllist'?`<select id="rS" aria-label="เจ้าหน้าที่"><option value="all">ทุกเจ้าหน้าที่</option>${staffList().map(n=>`<option ${n===r.staff?'selected':''}>${esc(n)}</option>`).join('')}</select>`:''}
+    <select id="rC" aria-label="ช่องทาง" ${/^(wl|smiv)/.test(r.type)?'hidden':''}><option value="all">ทุกช่องทาง</option>${CHK.map(k=>`<option value="${k}">${CHS[k]}</option>`).join('')}</select>
+    <select id="rP" aria-label="รพ.สต."><option value="all">ทุก รพ.สต.</option>${PCUS.map(x=>`<option ${x===r.pcu?'selected':''}>${esc(x)}</option>`).join('')}</select>
+    <label class="checks" style="font-size:13.5px;align-items:center"><input type="checkbox" id="rMask" ${r.mask?'checked':''}> อำพรางชื่อ</label></div>
+  ${r.type==='rx'?'<div class="note noprint">รายงานนี้มีชื่อ เบอร์โทร และที่อยู่ส่งยา สำหรับห้องยาและ rider เท่านั้น · แสดงเฉพาะเคสที่บันทึก “มา” ช่องทาง Tele (รพ.สต./อสม.) เรียงกลุ่มส่ง rider ก่อน ตามด้วยกลุ่มรับยาเองที่ รพ. · ไม่รวมเคสที่เลือก “วันนี้ไม่ส่งยา / วันนี้ไม่จ่ายยา”</div>':''}
+  <div class="bar noprint"><button class="btn" id="bPrint">พิมพ์</button><button class="btn primary" id="bPdf">บันทึกเป็น PDF (Google Drive)</button><button class="btn" id="bXlsx">ดาวน์โหลด Excel</button><div class="linkbox" id="pdfLink"></div></div>
+  ${R.headers.length>7?'<style>@page{size:A4 landscape}</style>':''}<div class="paper-wrap"><div class="paper" style="${R.headers.length>7?'width:297mm;min-height:210mm':''}">
+    <h1>${esc(R.title)}</h1>
+    <p class="c" style="margin:4px 0 0">${esc(D.settings.clinic||'')} ${esc(D.settings.hospital||'')}</p>
+    ${R.lines.map(l=>`<p class="c" style="margin:0">${esc(l)}</p>`).join('')}
+    ${R.summary?`<p class="c" style="margin:8px 0 12px;font-weight:600">${esc(R.summary)}</p>`:'<div style="height:12px"></div>'}
+    <table><thead><tr>${R.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${R.rows.map(row=>`<tr>${row.map((c,i)=>`<td${i===0||/^\d/.test(c)&&c.length<8?' class="c"':''}>${esc(c)}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${R.headers.length}" class="c">ไม่มีข้อมูล</td></tr>`}</tbody></table>
+    <div class="sign"><div>ลงชื่อ ..........................................<br>(${esc(D.user.name)})<br>ผู้รายงาน · ${thDateFull(D.today)}</div></div>
+  </div></div>`;
+  $('#rT').value=r.type;$('#rC').value=r.ch;if($('#rM'))$('#rM').value=r.type==='sum'||r.type==='wl'?'all':r.month;if($('#rP'))$('#rP').hidden=/^wl|smivlog/.test(r.type);
+  if($('#rS'))$('#rS').onchange=e=>{r.staff=e.target.value;vRep()};
+  $('#rT').onchange=e=>{r.type=e.target.value;if(r.type==='rx'){r.mask=false;r.day=D.today}if(r.type==='wllist'&&r.staff==='all'&&D.patients.some(myPt))r.staff=WN(D.user);vRep()};
+  if($('#rF'))$('#rF').onchange=e=>{r.fy=+e.target.value;vRep()};
+  if($('#rM'))$('#rM').onchange=e=>{r.month=e.target.value==='all'?'all':+e.target.value;vRep()};
+  if($('#rD'))$('#rD').onchange=e=>{if(e.target.value){r.day=e.target.value;vRep()}};
+  $('#rC').onchange=e=>{r.ch=e.target.value;vRep()};$('#rP').onchange=e=>{r.pcu=e.target.value;vRep()};
+  $('#rMask').onchange=e=>{r.mask=e.target.checked;vRep()};
+  $('#bPrint').onclick=()=>window.print();
+  $('#bXlsx').onclick=()=>exportXlsx(R);
+  $('#bPdf').onclick=async()=>{const b=$('#bPdf');b.disabled=true;$('#pdfLink').textContent='กำลังสร้าง PDF…';
+    try{const x=await api('makeReportPdf',Object.assign({},R,{signer:D.user.name,dateText:thDateFull(D.today),landscape:R.headers.length>7}));
+      $('#pdfLink').innerHTML=`<a href="${esc(x.url)}" target="_blank" rel="noopener">เปิด PDF: ${esc(x.name)}</a>`;toast('บันทึก PDF ลง Google Drive แล้ว')}
+    catch(e){$('#pdfLink').textContent='';fail(e)}finally{b.disabled=false}};
+}
+
+/* ดาวน์โหลดรายงานเป็น Excel (.xlsx) — สร้างในเบราว์เซอร์ด้วย SheetJS (โหลดเมื่อกดครั้งแรก) */
+function loadXlsxLib(){return window.XLSX?Promise.resolve():new Promise((ok,ko)=>{const sc=document.createElement('script');
+  sc.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';sc.onload=ok;sc.onerror=()=>ko(new Error('โหลดตัวสร้าง Excel ไม่ได้ ตรวจการเชื่อมต่ออินเทอร์เน็ต'));document.head.appendChild(sc)})}
+async function exportXlsx(R){
+  const b=$('#bXlsx');b.disabled=true;
+  try{
+    await loadXlsxLib();
+    const txtCol=R.headers.map(h=>/HN|โทร|CID|เลขที่/.test(h));
+    const cell=(c,j)=>{c=c==null?'':String(c);return !txtCol[j]&&/^-?(0|[1-9]\d*)(\.\d+)?$/.test(c)&&c.length<12?Number(c):c};
+    const top=[[R.title],[(D.settings.clinic||'')+' '+(D.settings.hospital||'')],...R.lines.map(l=>[l])];
+    if(R.summary)top.push([R.summary]);top.push([]);
+    const aoa=top.concat([R.headers],R.rows.map(r=>r.map(cell)));
+    const ws=XLSX.utils.aoa_to_sheet(aoa);
+    // HN / เบอร์โทร เก็บเป็นข้อความ (เลข 0 นำหน้าไม่หาย)
+    const h0=top.length;R.rows.forEach((r,i)=>r.forEach((c,j)=>{if(txtCol[j]){const ref=XLSX.utils.encode_cell({r:h0+1+i,c:j});if(ws[ref])ws[ref].t='s'}}));
+    ws['!cols']=R.headers.map((h,j)=>({wch:Math.min(50,Math.max(String(h).length,...R.rows.map(r=>String(r[j]==null?'':r[j]).length))+2)}));
+    ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:h0,c:0},e:{r:h0+Math.max(R.rows.length,1),c:R.headers.length-1}})};
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'รายงาน');
+    const name=(R.title+' '+(R.lines[0]||'')).replace(/[\\/:*?"<>|\[\]]/g,' ').replace(/\s+/g,' ').trim().slice(0,90)+'.xlsx';
+    const b64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});
+    const href='data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+b64;
+    const a=document.createElement('a');a.href=href;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    $('#pdfLink').innerHTML=`<a href="${href}" download="${esc(name)}">ถ้าไฟล์ไม่ดาวน์โหลดเอง กดที่นี่: ${esc(name)}</a>`;
+    toast('ดาวน์โหลด Excel แล้ว');
+  }catch(e){fail(e)}finally{b.disabled=false}
+}
+
+/* ================= Admin ================= */
+async function vAdmin(){
+  const s=D.settings;
+  $('#main').innerHTML=`
+  <div class="bar"><h2>ตั้งค่าระบบ</h2><span class="muted">เฉพาะ Admin</span></div>
+  <div class="grid2b">
+    <section class="panel"><h3>รอบนัดและวัน Telemed</h3>
+      <div class="fl"><span>วันทำ Telemed</span><div class="checks">${[1,2,3,4,5].map(d=>`<label class="chip" style="cursor:pointer;padding:6px 10px"><input type="checkbox" data-td="${d}" ${S.teleDays.includes(d)?'checked':''}> ${TD[d]}</label>`).join('')}</div></div>
+      <div class="fgrid" style="margin-top:12px">
+        <label class="fl"><span>รอบนัดปกติ (วัน)</span><input type="number" id="sCyc" value="${S.cycle}"></label>
+        <label class="fl"><span>นัดซ้ำหลังขาดนัด (วัน)</span><input type="number" id="sRe" value="${S.retry}"></label>
+        <label class="fl"><span>เลยวันนัดกี่วัน นับขาดนัดอัตโนมัติ</span><input type="number" id="sGr" value="${S.grace}"></label>
+        <label class="fl"><span>ขาดเกินกี่วัน นับขาดการรักษา</span><input type="number" id="sLost" value="${S.lostDays}"></label></div>
+      <label class="fl" style="margin-top:12px"><span>รายชื่อ รพ.สต. (คั่นด้วย , ไม่ต้องใส่ "รพ.สต.")</span><textarea id="sPcu">${esc(s.pcus)}</textarea></label>
+      <div class="fgrid" style="margin-top:12px"><label class="fl"><span>ชื่อหน่วยงานในรายงาน</span><input type="text" id="sCl" value="${esc(s.clinic)}"></label><label class="fl"><span>โรงพยาบาล</span><input type="text" id="sHo" value="${esc(s.hospital)}"></label></div>
+      <div style="margin-top:12px"><button class="btn primary sm" id="sSave">บันทึกการตั้งค่า</button></div></section>
+    <section class="panel"><h3>ผู้ใช้งาน</h3><div id="uBox" class="muted">กำลังโหลด…</div><div style="margin-top:10px"><button class="btn sm" id="addU">+ เพิ่มผู้ใช้</button></div></section>
+  </div>`;
+  $('#sSave').onclick=async()=>{const td=[...document.querySelectorAll('[data-td]:checked')].map(x=>+x.dataset.td);if(!td.length){toast('เลือกวัน Telemed อย่างน้อย 1 วัน');return}
+    try{D.settings=await api('saveSettings',{teleDays:td.join(','),cycle:$('#sCyc').value,retry:$('#sRe').value,grace:$('#sGr').value,lostDays:$('#sLost').value,
+      pcus:$('#sPcu').value.split(',').map(x=>x.trim().replace(/^รพ\.สต\./,'')).filter(Boolean).join(','),clinic:$('#sCl').value,hospital:$('#sHo').value});applySettings();toast('บันทึกการตั้งค่าแล้ว')}catch(e){fail(e)}};
+  $('#addU').onclick=()=>userForm();
+  try{drawUsers(await api('listUsers'))}catch(e){fail(e)}
+}
+function drawUsers(us){
+  $('#uBox').className='';
+  $('#uBox').innerHTML=`<div class="tw"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>ชื่อใน Workload</th><th>สิทธิ์</th><th>สถานะ</th><th></th></tr></thead><tbody>${us.map(u=>`<tr><td class="mono">${esc(u.code)}</td><td>${esc(u.name)}</td><td>${esc(u.wname||'')}</td><td><span class="role">${esc(u.role)}</span></td><td>${String(u.active).toUpperCase()==='TRUE'?'ใช้งาน':'ปิด'}</td><td><button class="btn sm ghost" data-u="${esc(u.code)}">แก้ไข</button></td></tr>`).join('')}</tbody></table></div>`;
+  document.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>userForm(us.find(x=>x.code===b.dataset.u)));
+}
+function userForm(u){
+  const e=!!u;u=u||{role:'staff',active:'TRUE'};
+  modal(`<h3>${e?'แก้ไขผู้ใช้':'เพิ่มผู้ใช้'}</h3><div class="fgrid">
+  <label class="fl"><span>รหัสผู้ใช้</span><input type="text" id="uC" value="${esc(u.code)}" ${e?'readonly':''} placeholder="S003"></label>
+  <label class="fl"><span>ชื่อ-สกุล</span><input type="text" id="uN" value="${esc(u.name)}"></label>
+  <label class="fl"><span>ชื่อในช่องเจ้าหน้าที่ Workload</span><input type="text" id="uW" value="${esc(u.wname)}" placeholder="เช่น อนุลักษณ์"></label>
+  <label class="fl"><span>สิทธิ์</span><select id="uR"><option value="staff" ${u.role==='staff'?'selected':''}>staff</option><option value="admin" ${u.role==='admin'?'selected':''}>admin</option></select></label>
+  <label class="fl"><span>${e?'ตั้งรหัสผ่านใหม่ (เว้นว่าง = ไม่เปลี่ยน)':'รหัสผ่าน (อย่างน้อย 6 ตัว)'}</span><input type="password" id="uP"></label></div>
+  <label class="checks" style="font-size:14px;align-items:center"><input type="checkbox" id="uA" ${String(u.active).toUpperCase()==='TRUE'?'checked':''}> เปิดใช้งาน</label>
+  <div class="mfoot"><button class="btn ghost" id="mCancel">ยกเลิก</button><button class="btn primary" id="mSave">บันทึก</button></div>`);
+  $('#mCancel').onclick=closeM;
+  $('#mSave').onclick=async()=>{try{const us=await api('saveUser',{code:$('#uC').value,name:$('#uN').value,wname:$('#uW').value.trim(),role:$('#uR').value,pass:$('#uP').value,active:$('#uA').checked});closeM();drawUsers(us);toast('บันทึกผู้ใช้แล้ว')}catch(e){fail(e)}};
+}
+
+/* ================= ดูข้อมูลผู้ป่วย (กดชื่อผู้ป่วยได้ทุกหน้า) ================= */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pv]');if(b){e.preventDefault();patientCard(b.dataset.pv)}});
+function kv(pairs){return `<div class="kv">${pairs.filter(x=>x[1]!==undefined&&x[1]!==null&&String(x[1]).trim()!=='').map(([k,v])=>`<div><span>${esc(k)}</span>${esc(v)}</div>`).join('')}</div>`}
+function visitKv(a){return kv([['วันที่',thDate(a.date)],['ช่องทาง',CHS[a.ch]||a.ch],['ผล',a.status+(a.rel==='TRUE'?' (ญาติรับยาแทน)':'')],['BP',a.bp],['P',a.pr],['BW',a.bw],['2Q',a.q2],['9Q',a.q9],['8Q',a.q8],
+  ['อาการทางจิต',a.sym],['ผลการรักษา',a.ctl],['การกินยา',a.adh],['สารเสพติด/สุรา',a.sub&&a.sub!=='-'?a.sub:''],['SMI-V',a.risk],['การปรับยา',a.med],['รายละเอียดปรับยา',a.medDetail],['การจ่ายยา',a.disp],['ค่าส่งยา',a.fee],
+  ['ผลติดตาม (ขาดนัด)',a.status==='ขาด'?a.fu:''],['นัดต่อ',noNx(a)?a.fu:a.next?thDate(a.next):'']])+(a.note?`<p class="hx">${esc(a.note)}</p>`:'')}
+async function patientCard(hn){
+  let p=P(hn);
+  try{loading(true,'กำลังเปิดข้อมูลผู้ป่วย…');const f=await api('getPatientFull',hn);if(f)p=Object.assign({},p,f)}catch(e){}finally{loading(false)}
+  const ap=D.appts.filter(a=>a.hn===hn).sort((a,b)=>a.date<b.date?1:-1);
+  const lastV=ap.find(a=>a.status==='มา'),lastAny=ap.find(a=>a.status==='มา'||a.status==='ขาด');
+  const nx=ap.filter(a=>a.status==='นัด').sort((a,b)=>a.date<b.date?-1:1)[0];
+  const st=pStatus(p,lastDone(),pendingSet());
+  const logs=vlOf(hn);const lastOf=t=>logs.find(v=>v.type===t);
+  const wls=D.wl.filter(w=>w.hn===hn).sort((a,b)=>a.date<b.date?1:-1);
+  const hist=[...ap.filter(a=>a.status==='มา'||a.status==='ขาด').map(a=>({d:a.date,a})),...wls.filter(w=>!w.aid).map(w=>({d:w.date,w}))].sort((x,y)=>x.d<y.d?1:-1).slice(0,20);
+  modal(`<h3>${esc(p.name)} <span class="chip ${p.g}">${GRP[p.g]||''}</span>${isSmiv(p)?' <span class="pill bad" style="font-size:11px">SMIV</span>':''} <span class="pill ${st==='รักษาต่อเนื่อง'?'ok':st==='ขาดการรักษา'?'bad':'warn'}" style="font-size:11px">${esc(st)}</span></h3>
+  <div class="bar"><button class="btn sm" id="pcEd">แก้ไขข้อมูล</button>${nx?'':'<button class="btn sm" id="pcAp">สร้างนัด</button>'}<button class="btn sm" id="pcWl">บันทึกงานอื่น</button>${isSmiv(p)?'<button class="btn sm primary" id="pcSm">+ บันทึก SMIV</button><button class="btn sm" id="pcSh">ประวัติ SMIV</button>':''}<span class="spacer"></span><button class="btn sm ghost" id="mCancel">ปิด</button></div>
+  <div class="pc-sec"><h4>ข้อมูลผู้ป่วย</h4>${kv([['HN',p.hn],['อายุ',ageOf(p.dob)!==''?ageOf(p.dob)+' ปี':''],['เพศ',p.sex],['ICD-10',p.icd],['โรคประจำตัว',p.dx],['คลินิก',p.clinic],['ประเภท SMIV',isSmiv(p)?p.smivType:''],
+    ['พยาบาลผู้ดูแล',nurseName(p.nurse)],['รพ.สต.ฐาน',p.pcu],['สิทธิ์',p.right],['โทร',p.phone],['ผู้ดูแล/เบอร์อื่น',p.caregiver],['แพ้ยา',p.allergy],['ที่อยู่',p.addr],['ที่อยู่ส่งยา',p.shipAddr],['หมายเหตุ',p.remark]])}
+    ${p.meds?`<div style="font-size:12px;color:var(--muted)">ยาที่ใช้ (ทะเบียน)</div><p class="hx">${esc(p.meds)}</p>`:''}</div>
+  <div class="pc-sec"><h4>นัดถัดไป</h4>${nx?kv([['วันนัด',thDateFull(nx.date)],['ช่องทาง',CH[nx.ch]||nx.ch]]):(noNx(lastAny)?`<span class="pill warn">${esc(lastAny.fu)}</span> <span class="muted" style="font-size:12px">บันทึก ${thDate(lastAny.date)}</span>`:'<span class="muted">ยังไม่มีนัดในระบบ</span>')}</div>
+  <div class="pc-sec"><h4>การรับบริการล่าสุด${lastV?' — '+thDate(lastV.date):''}</h4>${lastV?visitKv(lastV)+'<button class="btn sm ghost" id="pcHos" style="justify-self:start">ดูข้อความที่บันทึกลง HosXP</button><div id="pcHosT"></div>':'<span class="muted">ยังไม่มีบันทึกการมารับบริการ</span>'}
+    ${lastAny&&lastAny!==lastV&&lastAny.status==='ขาด'?`<div style="font-size:13px;color:var(--bad)">ขาดนัดล่าสุด ${thDate(lastAny.date)}${lastAny.fu?' · '+esc(lastAny.fu):''}</div>`:''}</div>
+  ${isSmiv(p)||logs.length?`<div class="pc-sec"><h4>SMIV ล่าสุด</h4>${['ส่งต่อ','รับกลับ','ติดตาม','ส่งเอกสารหน่วยงาน'].map(t=>{const v=lastOf(t);return v?`<div style="font-size:13.5px"><b>${esc(t)}</b> ${thDate(v.date)} — ${esc(logText(v))}${v.meds?`<div><b>ยาใหม่:</b> ${esc(v.meds)}</div>`:''}${v.plan?`<div><b>แผนการรักษา:</b> ${esc(v.plan)}</div>`:''}${v.note?`<div class="muted">${esc(v.note)}</div>`:''}</div>`:''}).join('')||'<span class="muted">ยังไม่มีบันทึก SMIV</span>'}</div>`:''}
+  <div class="pc-sec"><h4>ประวัติการรับบริการ (${hist.length} รายการล่าสุด) — กดเพื่อดูรายละเอียด</h4>
+    ${hist.map(h=>h.a?`<details class="vh"><summary>${thDate(h.d)} · นัด ${esc(CHS[h.a.ch]||'')} — <b style="color:${h.a.status==='มา'?'var(--ok)':'var(--bad)'}">${esc(h.a.status)}</b>${h.a.med&&h.a.med!=='Remed'?' · '+esc(h.a.med):''}${h.a.risk==='มี'?' · <b style="color:var(--bad)">SMI-V</b>':''}</summary>${visitKv(h.a)}
+      ${(()=>{const w=wls.find(x=>x.aid===h.a.aid);return w?`<div style="font-size:12.5px;color:var(--muted)">Workload: ${esc([w.point,w.clinic,w.assess,w.counsel,w.duration,w.staff].filter(Boolean).join(' · '))}</div>`:''})()}</details>`
+      :`<details class="vh"><summary>${thDate(h.d)} · Workload ${esc(h.w.point)} · ${esc(h.w.clinic)}</summary>${kv([['ประเมิน',h.w.assess],['ให้คำปรึกษา',h.w.counsel],['เยี่ยมบ้าน',h.w.homevisit],['ประสานส่งต่อ',h.w.refer],['ระยะเวลา',h.w.duration],['ความรุนแรง',h.w.severity],['เจ้าหน้าที่',h.w.staff],['หัตถการ',h.w.proc],['หมายเหตุ',h.w.note]])}</details>`).join('')||'<span class="muted">ไม่มีประวัติในปีงบนี้และปีก่อน</span>'}</div>`);
+  $('#mCancel').onclick=closeM;
+  $('#pcEd').onclick=()=>openPatientForm(p);
+  if($('#pcAp'))$('#pcAp').onclick=()=>apptModal(hn,()=>render());
+  $('#pcWl').onclick=()=>wlModalFor(hn,Object.assign(wlDefault(p,'opd',D.today),{point:'โทรศัพท์'}));
+  if($('#pcSm'))$('#pcSm').onclick=()=>smivLogModal(hn);
+  if($('#pcSh'))$('#pcSh').onclick=()=>smivHistory(hn);
+  if($('#pcHos'))$('#pcHos').onclick=async()=>{const b=$('#pcHos');b.disabled=true;try{const t=await api('getVisitText',lastV.aid);$('#pcHosT').innerHTML=t?`<p class="hx">${esc(t)}</p>`:'<span class="muted">ไม่มีข้อความที่บันทึกไว้</span>';b.hidden=true}catch(e){b.disabled=false;fail(e)}};
+}
+
+/* ================= start ================= */
+(function(){const t=ss('ml_tk');if(t){D.token=t;boot()}})();
+</script>
+</body>
+</html>
